@@ -5,6 +5,8 @@ if (!process.argv[2]) {
 	process.exit(1);
 }
 
+const pageUrl = `http://localhost:3000/benchmarks/${process.argv[2]}`.trim();
+
 const browser = await puppeteer.launch({
 	headless: 'new',
 });
@@ -32,8 +34,16 @@ page.on('requestfailed', (request) => {
 	process.exit(1);
 });
 
+// Detect a 404 on the pageUrl, indicating it’s an invalid benchmark
+page.on('response', response => {
+	if ((response.status() === 404) && (response.url() === pageUrl)) {
+		console.error(`❌ Invalid benchmark. The page at ${pageUrl} could not be found`);
+		process.exit(1);
+	}
+});
+
 // Navigate to test page
-await page.goto(`http://localhost:3000/benchmarks/${process.argv[2]}`);
+await page.goto(pageUrl);
 
 // Run and wait for test
 await page.evaluate(async () => {
