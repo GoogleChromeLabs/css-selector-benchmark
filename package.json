@@ -1,0 +1,25 @@
+{
+  "name": "css-selector-benchmark",
+  "version": "0.0.1",
+  "description": "CSS Selector Benchmark",
+  "scripts": {
+    "start": "serve src",
+    "build": "rm -rf build && mkdir build && cp -R -L src/* build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "css",
+    "performance",
+    "benchmark"
+  ],
+  "author": {
+    "name": "Bramus Van Damme",
+    "email": "bramus@bram.us",
+    "twitter": "@bramus",
+    "web": "https://www.bram.us/"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}
