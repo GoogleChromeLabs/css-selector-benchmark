@@ -2,9 +2,14 @@
   "name": "css-selector-benchmark",
   "version": "0.0.1",
   "description": "CSS Selector Benchmark",
+  "type": "module",
+  "main": "./cli/index.js",
   "scripts": {
     "start": "serve src",
-    "build": "rm -rf build && mkdir build && cp -R -L src/* build",
+    "lint": "prettier --check '{src,test,cli}/**/*.{ts,tsx,js,jsx,html,css}'",
+    "format": "prettier --write '{src,test,cli}/**/*.{ts,tsx,js,jsx,html,css}'",
+	"bench": "node cli/index.js",
+	"benchmark": "node cli/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -20,6 +25,10 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "prettier": "^2.8.4",
     "serve": "^14.2.0"
+  },
+  "dependencies": {
+    "puppeteer": "^19.7.2"
   }
 }

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Test</title>
+		<script type="module">
+			import PerfTestRunner from '/lib/PerfTestRunner.js';
+
+			window.startTest = () =>
+				new Promise((resolve, reject) => {
+					PerfTestRunner.measureRunsPerSecond({
+						description: 'This is an example benchmark',
+						run: function () {
+							for (var i = 0; i < 100; i++) {
+								document.querySelectorAll('body');
+							}
+						},
+						done: resolve,
+					});
+				});
+		</script>
+	</head>
+	<body></body>
+</html>
