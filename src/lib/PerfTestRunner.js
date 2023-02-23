@@ -156,6 +156,8 @@ function start(test, scheduler, runner) {
 	}
 	currentTest = test;
 
+	if (currentTest.description) PerfTestRunner.logInfo('Description: ' + currentTest.description);
+
 	if (test.tracingCategories && !test.traceEventsToMeasure) {
 		PerfTestRunner.logFatalError("test's tracingCategories is " + "specified but test's traceEventsToMeasure is empty");
 		return;
@@ -252,16 +254,15 @@ function finish() {
 	try {
 		// The blink_perf timer is only started for non-worker test.
 		if (!currentTest.runInWorker) console.timeEnd('blink_perf');
-		if (currentTest.description) PerfTestRunner.log('Description: ' + currentTest.description);
 		PerfTestRunner.logStatistics(results, PerfTestRunner.unit, 'Time:');
 		if (jsHeapResults.length) {
 			PerfTestRunner.logStatistics(jsHeapResults, 'bytes', 'JS Heap:');
 		}
 		if (logLines) logLines.forEach(logInDocument);
 		window.scrollTo(0, document.body.offsetHeight);
-		if (currentTest.done) currentTest.done();
+		if (currentTest.done) currentTest.done(results);
 	} catch (exception) {
-		logInDocument(PerfTestRunner.formatException('finalizing the test', exception));
+		PerfTestRunner.logException(PerfTestRunner.formatException('finalizing the test', exception));
 	}
 
 	if (window.testRunner) {

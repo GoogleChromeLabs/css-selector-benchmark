@@ -36,6 +36,8 @@ This will run the benchmark served by `http://localhost:3000/benchmarks/example/
 
 Benchmarks are HTML pages stored in a subfolder in `./src/benchmarks/`. The page **MUST** expose a `window.startTest` method which returns a promise. When the test logic is done, it **MUST** resolve that promise.
 
+This `window.startTest` is automatically invoked by `npm run benchmark x` when the page has loaded. Once `window.startTest` has resolved, the benchmark will be closed and any returned output will be logged.
+
 Using [Chromium’s `PerfTestRunner`](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/perf_tests/resources/runner.js), a typical test looks like this:
 
 ```html

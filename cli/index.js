@@ -46,9 +46,18 @@ page.on('response', response => {
 await page.goto(pageUrl);
 
 // Run and wait for test
-await page.evaluate(async () => {
-	await window.startTest();
+console.log('== Starting Benchmark ====== ');
+const results = await page.evaluate(async () => {
+	return await window.startTest();
 });
+console.log('== End Benchmark =========== ');
+
+// Process Results (@TODO)
+if (results) {
+	for (const result of results) {
+		console.log(result);
+	}
+}
 
 // Close browser
 await browser.close();
