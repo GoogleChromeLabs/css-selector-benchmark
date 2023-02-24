@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Test</title>
+	<meta name="source" content="https://github.com/benfrain/css-performance-tests/blob/master/CSS%20Selectors/">
+	<script type="module">
+		import PerfTestRunner from '/lib/PerfTestRunner.js';
+		import { createElement } from '/lib/DOM.js';
+
+		const $container = document.querySelector('#container');
+
+		function makeTree(parentEl, numSiblings) {
+			for (var i = 0; i <= numSiblings; i++) {
+				$container.appendChild(
+					createElement('div', {
+						className: `tagDiv wrap${i}`,
+						innerHTML: `<div class="tagDiv layer1" data-div="layer1">
+										<div class="tagDiv layer2">
+											<ul class="tagUl">
+												<li class="tagLi"><b class="tagB"><a href="/" class="tagA link" data-select="link">Select</a></b></li>
+											</ul>
+										</div>
+									</div>`,
+					})
+				);
+			}
+		}
+
+		makeTree($container, 1000);
+		$container.offsetHeight; // force recalc style
+
+		function resetCSS() {
+			document.adoptedStyleSheets = [];
+		}
+		function setCSS(css) {
+			const stylesheet = new CSSStyleSheet();
+			stylesheet.replaceSync(css);
+			document.adoptedStyleSheets = [stylesheet];
+		}
+
+		const selectors = {
+			'1. Data Attribute (unqualified)': '[data-select]',
+			'2. Data Attribute (qualified)': 'a[data-select]',
+			'3. Data Attribute (unqualified with value)': '[data-select="link"]',
+			'4. Data Attribute (qualified with value)': 'a[data-select="link"]',
+			'5. Multiple Data Attributes (qualified with values)': 'div[data-div="layer1"] a[data-select="link"]',
+			'6. Solo Pseudo selector': 'a:after',
+			'7. Combined classes': '.tagA.link',
+			'8. Multiple classes': '.tagUl .link',
+			'9. Multiple classes (using child selector)': '.tagB > .tagA',
+			'10. Partial attribute matching': '[class^="wrap"]',
+			'11. Nth-child selector': '.div:nth-of-type(1) a',
+			'12. Nth-child selector followed by nth-child selector': '.div:nth-of-type(1) .div:nth-of-type(1) a',
+			'13. Insanity selection (unlucky for some)': 'div.wrapper > div.tagDiv > div.tagDiv.layer2 > ul.tagUL > li.tagLi > b.tagB > a.TagA.link',
+			'14. Slight insanity': '.tagLi .tagB a.TagA.link',
+			'15. Universal': '*',
+			'16. Element single': 'a',
+			'17. Element double': 'div a',
+			'18. Element treble': 'div ul a',
+			'19. Element treble pseudo': 'div ul a:after',
+			'20. Single class': '.link',
+		}
+
+		const runTest = (description, selector) => new Promise((resolve, reject) => {
+			PerfTestRunner.measureRunsPerSecond({
+				description: `Selector Test ${description}`,
+				run: function() {
+					setCSS(`${selector} { color: red; }`);
+					$container.offsetHeight; // force recalc style
+				},
+				iterationCount: 2,
+				teardown: resetCSS,
+				done: resolve,
+			});
+		});
+
+		window.startTest = () =>
+			new Promise(async (resolve, reject) => {
+				const allResults = [];
+
+				for (const [description, selector] of Object.entries(selectors)) {
+					const testResult = await runTest(description, selector);
+					allResults.push({
+						description,
+						selector,
+						result: testResult,
+					});
+				}
+
+				resolve(allResults);
+			});
+	</script>
+</head>
+
+<body>
+	<div id="container"></div>
+</body>
+
+</html>
