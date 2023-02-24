@@ -1,7 +1,7 @@
 const createElement = (tagName, options = null) => {
-	const { children, parent, ...rest } = options ?? {};
+	const { children, ...rest } = options ?? {};
 
-	const $el = Object.assign(new HTMLElement(tagName), rest);
+	const $el = Object.assign(document.createElement(tagName), rest);
 
 	if (children) {
 		for (const $child of children) {
@@ -9,10 +9,6 @@ const createElement = (tagName, options = null) => {
 				$el.appendChild($child);
 			}
 		}
-	}
-
-	if (parent) {
-		parent.appendChild($el);
 	}
 
 	return $el;
