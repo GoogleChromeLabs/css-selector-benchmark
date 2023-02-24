@@ -149,12 +149,24 @@ PerfTestRunner.forceLayout = function (doc) {
 	else if (doc.documentElement) doc.documentElement.offsetHeight;
 };
 
+function reset() {
+	logLines = null;
+	completedIterations = -1;
+	callsPerIteration = 1;
+	currentTest = null;
+	results = [];
+	jsHeapResults = [];
+	iterationCount = undefined;
+}
+
 function start(test, scheduler, runner) {
 	if (!test || !runner) {
 		PerfTestRunner.logFatalError('Got a bad test object.');
 		return;
 	}
+	reset();
 	currentTest = test;
+
 
 	if (currentTest.description) PerfTestRunner.logInfo('Description: ' + currentTest.description);
 
