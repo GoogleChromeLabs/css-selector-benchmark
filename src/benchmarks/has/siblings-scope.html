@@ -11,9 +11,13 @@
 		const $from = document.querySelector('#from');
 
 		const selectors = {
-			'Without :has() (ref)': '.from ~ li',
-			'Non-scoped :has()': '.from ~ :has(~ .to)',
-			'Scoped :has()': '.from ~ li:has(~ .to)',
+			'All li’s (ref)': 'li { … }',
+			'All li’s after .from (ref)': '.from ~ li { … }',
+			'All li’s between .from and .to using non-scoped :has()': '.from ~ :has(~ .to) { … }',
+			'All li’s between .from and .to using scoped :has()': '.from ~ li:has(~ .to) { … }',
+			'All li’s between .from and .to with nesting in the mix': 'ul { .from ~ li:has(~ .to) { … } }',
+			// 'All li’s between .from and .to with @scope in the mix': '@scope(.from) { :host ~ li:has(~ .to) { … } }', // This syntax is specced, but not implemented yet …
+			'All li’s between .from and .to with @scope in the mix': '@scope(ul) { .from ~ li:has(~ .to) { … } }', // This syntax is what is currently implemented
 		}
 
 		function resetCSS() {
@@ -25,11 +29,11 @@
 			document.adoptedStyleSheets = [stylesheet];
 		}
 
-		const runTest = (description, selector) => new Promise((resolve, reject) => {
+		const runTest = (description, css) => new Promise((resolve, reject) => {
 			PerfTestRunner.measureRunsPerSecond({
 				description: `Selector Test ${description}`,
 				run: function() {
-					setCSS(`${selector} { color: red; }`);
+					setCSS(`${css.replace('…', 'color: red;')}`);
 					$container.offsetHeight; // force recalc style
 				},
 				iterationCount: 3,
@@ -42,11 +46,11 @@
 			new Promise(async (resolve, reject) => {
 				const allResults = [];
 
-				for (const [description, selector] of Object.entries(selectors)) {
-					const testResult = await runTest(description, selector);
+				for (const [description, css] of Object.entries(selectors)) {
+					const testResult = await runTest(description, css);
 					allResults.push({
 						description,
-						selector,
+						selector: css,
 						result: testResult,
 					});
 				}
