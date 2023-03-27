@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Test</title>
+	<script type="module">
+		import PerfTestRunner from '/lib/PerfTestRunner.js';
+
+		const $container = document.querySelector('#container');
+		const $from = document.querySelector('#from');
+
+		const selectors = {
+			'Without :has() (ref)': '.from ~ li',
+			'Non-scoped :has()': '.from ~ :has(~ .to)',
+			'Scoped :has()': '.from ~ li:has(~ .to)',
+		}
+
+		function resetCSS() {
+			document.adoptedStyleSheets = [];
+		}
+		function setCSS(css) {
+			const stylesheet = new CSSStyleSheet();
+			stylesheet.replaceSync(css);
+			document.adoptedStyleSheets = [stylesheet];
+		}
+
+		const runTest = (description, selector) => new Promise((resolve, reject) => {
+			PerfTestRunner.measureRunsPerSecond({
+				description: `Selector Test ${description}`,
+				run: function() {
+					setCSS(`${selector} { color: red; }`);
+					$container.offsetHeight; // force recalc style
+				},
+				iterationCount: 3,
+				teardown: resetCSS,
+				done: resolve,
+			});
+		});
+
+		window.startTest = () =>
+			new Promise(async (resolve, reject) => {
+				const allResults = [];
+
+				for (const [description, selector] of Object.entries(selectors)) {
+					const testResult = await runTest(description, selector);
+					allResults.push({
+						description,
+						selector,
+						result: testResult,
+					});
+				}
+
+				resolve(allResults);
+			});
+	</script>
+</head>
+<body>
+	<div id="container">
+		<ul>
+			<li>outside</li>
+			<li class="from" id="from">from</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li>in-between</li>
+			<li class="to" id="to">to</li>
+			<li>outside</li>
+		</ul>
+	</div>
+</body>
+</html>
