@@ -9,6 +9,11 @@ const pageUrl = `http://localhost:3000/benchmarks/${process.argv[2]}`.trim();
 
 const browser = await puppeteer.launch({
 	headless: 'new',
+	args:[
+		"--flag-switches-begin",
+		"--enable-experimental-web-platform-features",
+		"--flag-switches-end"
+	],
 });
 
 const page = await browser.newPage();
