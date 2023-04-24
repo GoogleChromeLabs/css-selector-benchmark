@@ -27,6 +27,14 @@
 				nav:has([aria-expanded="true"]) nav ul {
 					display: flex;
 				}`,
+			'Scoped to nav as direct child': `
+				nav:has(> [aria-expanded="true"]) {
+					--open: 1;
+				}
+
+				nav:has(> [aria-expanded="true"]) nav ul {
+					display: flex;
+				}`,
 		}
 
 		function resetCSS() {
