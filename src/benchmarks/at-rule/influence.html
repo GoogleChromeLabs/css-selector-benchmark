@@ -30,35 +30,35 @@
 		const $container = document.querySelector('#container');
 
 		const selectors = {
-			'none': `										/* 8400 */
+			'none': `										/* 4000 */
 				#container .special {
 					outline: 1px solid red;
 				}`,
-			'nesting': `									/* 6700 */
+			'nesting': `									/* 3300 */
 				#container {
 					.special {
 						outline: 1px solid red;
 					}
 				}`,
-			'@scope': `										/* 7000 */
+			'@scope': `										/* 3600 */
 				@scope (#container) {
 					.special {
 						outline: 1px solid red;
 					}
 				}`,
-			'@container size': `							/* 6300 */
+			'@container size': `							/* 2100 */
 				@container container (width > 1px) {
 					.special {
 						outline: 1px solid red;
 					}
 				}`,
-			'@container style (unregistered)': `			/* 5500 */
+			'@container style (unregistered)': `			/* 2100 */
 				@container style(--unregistered: yes) {
 					.special {
 						outline: 1px solid red;
 					}
 				}`,
-			'@container style (registered)': `				/* 5500 */
+			'@container style (registered)': `				/* 2100 */
 				@container style(--registered: yes) {
 					.special {
 						outline: 1px solid red;
@@ -66,24 +66,29 @@
 				}`,
 		}
 
-		function resetCSS() {
+		function createStyleSheet(cssText) {
+			const stylesheet = new CSSStyleSheet();
+			stylesheet.replaceSync(cssText);
+			return stylesheet;
+		}
+
+		function removeStyleSheet() {
 			document.adoptedStyleSheets = [];
 		}
-		function setCSS(css) {
-			const stylesheet = new CSSStyleSheet();
-			stylesheet.replaceSync(css);
+		function adoptStyleSheet(stylesheet) {
 			document.adoptedStyleSheets = [stylesheet];
 		}
 
-		const runTest = (description, css) => new Promise((resolve, reject) => {
+		const runTest = (description, stylesheet) => new Promise((resolve, reject) => {
 			PerfTestRunner.measureRunsPerSecond({
 				description: `Selector Test ${description}`,
 				run: function() {
-					setCSS(css);
+					adoptStyleSheet(stylesheet);
+					document.body.offsetLeft; // Trigger layout
+					removeStyleSheet();
 					document.body.offsetLeft; // Trigger layout
 				},
-				iterationCount: 5,
-				teardown: resetCSS,
+				iterationCount: 10,
 				done: resolve,
 			});
 		});
@@ -93,7 +98,7 @@
 				const allResults = [];
 
 				for (const [description, css] of Object.entries(selectors)) {
-					const testResult = await runTest(description, css);
+					const testResult = await runTest(description, createStyleSheet(css));
 					allResults.push({
 						description,
 						css,
