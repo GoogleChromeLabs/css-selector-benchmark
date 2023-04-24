@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Test</title>
+	<style>
+		.special {
+			background: rgb(0 0 0 / 0.1);
+			border-left: 1px solid currentcolor;
+		}
+
+		@property --registered {
+			syntax: 'yes|no';
+			initial: yes;
+			inherits: false;
+		}
+
+		#container {
+			container-name: container;
+			container-type: inline-size;
+
+			--unregistered: yes;
+			--registered: yes;
+		}
+	</style>
+	<script type="module">
+		import PerfTestRunner from '/lib/PerfTestRunner.js';
+
+		const $container = document.querySelector('#container');
+
+		const selectors = {
+			'none': `										/* 8400 */
+				#container .special {
+					outline: 1px solid red;
+				}`,
+			'@scope': `										/* 7000 */
+				@scope (#container) {
+					.special {
+						outline: 1px solid red;
+					}
+				}`,
+			'@container size': `							/* 6300 */
+				@container container (width > 1px) {
+					.special {
+						outline: 1px solid red;
+					}
+				}`,
+			'@container style (unregistered)': `			/* 5500 */
+				@container style(--unregistered: yes) {
+					.special {
+						outline: 1px solid red;
+					}
+				}`,
+			'@container style (registered)': `				/* 5500 */
+				@container style(--registered: yes) {
+					.special {
+						outline: 1px solid red;
+					}
+				}`,
+		}
+
+		function resetCSS() {
+			document.adoptedStyleSheets = [];
+		}
+		function setCSS(css) {
+			const stylesheet = new CSSStyleSheet();
+			stylesheet.replaceSync(css);
+			document.adoptedStyleSheets = [stylesheet];
+		}
+
+		const runTest = (description, css) => new Promise((resolve, reject) => {
+			PerfTestRunner.measureRunsPerSecond({
+				description: `Selector Test ${description}`,
+				run: function() {
+					setCSS(css);
+					document.body.offsetLeft; // Trigger layout
+				},
+				iterationCount: 5,
+				teardown: resetCSS,
+				done: resolve,
+			});
+		});
+
+		window.startTest = () =>
+			new Promise(async (resolve, reject) => {
+				const allResults = [];
+
+				for (const [description, css] of Object.entries(selectors)) {
+					const testResult = await runTest(description, css);
+					allResults.push({
+						description,
+						css,
+						result: testResult,
+					});
+				}
+
+				resolve(allResults);
+			});
+	</script>
+</head>
+<body>
+	<div>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special" id="veryspecial">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+	</div>
+	<div>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special" id="veryspecial">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+	</div>
+	<div>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special" id="veryspecial">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+	</div>
+	<div id="container">
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special" id="veryspecial">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+	</div>
+	<div>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special" id="veryspecial">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+	</div>
+	<div>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special" id="veryspecial">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+	</div>
+	<div>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special" id="veryspecial">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+	</div>
+</body>
+</html>
