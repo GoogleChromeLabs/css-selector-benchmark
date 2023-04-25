@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Test</title>
+	<style>
+		:is(#container) .special {
+			background: rgb(0 0 0 / 0.1);
+			border-left: 1px solid currentcolor;
+		}
+	</style>
+	<script type="module">
+		import PerfTestRunner from '/lib/PerfTestRunner.js';
+
+		const $container = document.querySelector('#container');
+		const $veryspecial = document.querySelector('#veryspecial');
+
+		window.startTest = () =>
+			new Promise((resolve, reject) => {
+				PerfTestRunner.measureRunsPerSecond({
+					description: 'Without Nesting',
+					run: function () {
+						$container.id = 'not-container';
+						$container.offsetHeight; // force recalc style
+						$container.id = 'container';
+						$container.offsetHeight; // force recalc style
+					},
+					done: resolve,
+				});
+			});
+	</script>
+</head>
+<body>
+	<div id="container">
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special" id="veryspecial">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+		<p class="special">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eaque in, enim rem recusandae mollitia error, natus ab atque dignissimos culpa veniam exercitationem sequi voluptates, commodi corrupti ullam sit. Debitis, a!</p>
+	</div>
+</body>
+</html>
