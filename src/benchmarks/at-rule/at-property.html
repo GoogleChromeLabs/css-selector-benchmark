@@ -58,6 +58,30 @@
 			document.adoptedStyleSheets = [stylesheet];
 		}
 
+		const testRegularPropNoInherit = (description) => new Promise((resolve, reject) => {
+			PerfTestRunner.measureRunsPerSecond({
+				description,
+				run: function() {
+					document.documentElement.style.setProperty('z-index', Math.round(Math.random() * 100));
+					$container.offsetHeight;
+				},
+				iterationCount: 5,
+				done: resolve,
+			});
+		});
+
+		const testRegularPropWithInherit = (description) => new Promise((resolve, reject) => {
+			PerfTestRunner.measureRunsPerSecond({
+				description,
+				run: function() {
+					document.documentElement.style.setProperty('color', `#${Math.floor(Math.random()*16777215).toString(16)}`);
+					$container.offsetHeight;
+				},
+				iterationCount: 5,
+				done: resolve,
+			});
+		});
+
 		const testUnRegistered = (description) => new Promise((resolve, reject) => {
 			PerfTestRunner.measureRunsPerSecond({
 				description,
@@ -95,6 +119,8 @@
 		});
 
 		const tests = {
+			'Regular Property that does not inherit': testRegularPropNoInherit,
+			'Regular Property that does inherit': testRegularPropWithInherit,
 			'Unregistered Custom Property': testUnRegistered,
 			'Registered Custom Property': testRegistered,
 			'Registered Custom Property that does not inherit': testRegisteredNoInherit,
