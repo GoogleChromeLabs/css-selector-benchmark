@@ -170,6 +170,9 @@
 			PerfTestRunner.measureRunsPerSecond({
 				description,
 				setup: () => {
+					// Already setup
+					if (document.adoptedStyleSheets.length == 2) return;
+
 					let propertyRegistrations = [];
 					let declarations = [];
 					for (let i = 0; i < 50000; i++) {
@@ -188,10 +191,12 @@
 				},
 				iterationCount: 5,
 				teardown: () => {
-					resetCSS();
 					document.documentElement.style.removeProperty('--registered-no-inherit');
 				},
-				done: resolve,
+				done: (results) => {
+					resetCSS();
+					resolve(results);
+				},
 			});
 		});
 
