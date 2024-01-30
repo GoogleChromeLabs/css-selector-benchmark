@@ -175,7 +175,7 @@
 
 					let propertyRegistrations = [];
 					let declarations = [];
-					for (let i = 0; i < 50000; i++) {
+					for (let i = 0; i < 25000; i++) {
 						propertyRegistrations.push(`@property --custom-${i} { syntax: "<number>"; initial-value: 0; inherits: true; }`);
 						declarations.push(`--custom-${i}: ${Math.random()}`);
 					}
@@ -206,7 +206,7 @@
 			'Unregistered Custom Property': testUnRegistered,
 			'Registered Custom Property': testRegistered,
 			'Registered Custom Property that does not inherit': testRegisteredNoInherit,
-			'Registered Custom Property that does not inherit with 50000 other registered custom props': testRegisteredNoInheritMoreRegistered,
+			'Registered Custom Property that does not inherit with 25000 other registered custom props': testRegisteredNoInheritMoreRegistered,
 		}
 
 		window.startTest = () =>
