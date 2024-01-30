@@ -66,6 +66,9 @@
 					$container.offsetHeight;
 				},
 				iterationCount: 5,
+				teardown: () => {
+					document.documentElement.style.removeProperty('z-index');
+				},
 				done: resolve,
 			});
 		});
@@ -78,6 +81,9 @@
 					$container.offsetHeight;
 				},
 				iterationCount: 5,
+				teardown: () => {
+					document.documentElement.style.removeProperty('color');
+				},
 				done: resolve,
 			});
 		});
@@ -90,6 +96,9 @@
 					$container.offsetHeight;
 				},
 				iterationCount: 5,
+				teardown: () => {
+					document.documentElement.style.removeProperty('--unregistered');
+				},
 				done: resolve,
 			});
 		});
@@ -102,6 +111,9 @@
 					$container.offsetHeight;
 				},
 				iterationCount: 5,
+				teardown: () => {
+					document.documentElement.style.removeProperty('--registered');
+				},
 				done: resolve,
 			});
 		});
@@ -114,6 +126,9 @@
 					$container.offsetHeight;
 				},
 				iterationCount: 5,
+				teardown: () => {
+					document.documentElement.style.removeProperty('--registered-no-inherit');
+				},
 				done: resolve,
 			});
 		});
