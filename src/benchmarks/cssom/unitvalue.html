@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Test</title>
+	<script type="module">
+		import PerfTestRunner from '/lib/PerfTestRunner.js';
+
+		/**
+		 * CSSUnitValue manual concat
+		 */
+		const testManual = (description) => new Promise((resolve, reject) => {
+			PerfTestRunner.measureRunsPerSecond({
+				description,
+				run: function() {
+					const px = new CSSUnitValue(100, 'px');
+					const str = px.value + px.unit;
+				},
+				iterationCount: 5,
+				done: resolve,
+			});
+		});
+
+		/**
+		 * CSSUnitValue.toString()
+		 */
+		const testToString = (description) => new Promise((resolve, reject) => {
+			PerfTestRunner.measureRunsPerSecond({
+				description,
+				run: function() {
+					const px = new CSSUnitValue(100, 'px');
+					const str = px.toString();
+				},
+				iterationCount: 5,
+				done: resolve,
+			});
+		});
+
+		const tests = {
+			'CSSUnitValue manual concat': testManual,
+			'CSSUnitValue.toString()': testToString,
+		}
+
+		window.startTest = () =>
+			new Promise(async (resolve, reject) => {
+				const allResults = [];
+
+				for (const [description, test] of Object.entries(tests)) {
+					const testResult = await test(description);
+					allResults.push({
+						description,
+						result: testResult,
+					});
+				}
+
+				resolve(allResults);
+			});
+	</script>
+</head>
+
+<body>
+	<div id="container"></div>
+</body>
+
+</html>
