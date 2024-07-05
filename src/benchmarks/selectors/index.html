@@ -69,11 +69,13 @@
 		const runTest = (description, selector) => new Promise((resolve, reject) => {
 			PerfTestRunner.measureRunsPerSecond({
 				description: `Selector Test ${description}`,
-				run: function() {
+				setup: () => {
 					setCSS(`${selector} { color: red; }`);
+				},
+				run: function() {
 					$container.offsetHeight; // force recalc style
 				},
-				iterationCount: 2,
+				iterationCount: 5,
 				teardown: resetCSS,
 				done: resolve,
 			});

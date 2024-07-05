@@ -49,9 +49,10 @@
 		const runTest = (description, css) => new Promise((resolve, reject) => {
 			PerfTestRunner.measureRunsPerSecond({
 				description: `Selector Test ${description}`,
+				setup: () => {
+					setCSS(css);
+				},
 				run: function() {
-					setCSS(`${css.replace('…', 'color: red;')}`);
-
 					$navControl.setAttribute('aria-expanded', 'true');
 					$navControl.offsetHeight; // force recalc style
 					$navControl.setAttribute('aria-expanded', 'false');
@@ -63,6 +64,7 @@
 			});
 		});
 
+		const average = array => array.reduce((a, b) => a + b) / array.length;
 		window.startTest = () =>
 			new Promise(async (resolve, reject) => {
 				const allResults = [];
@@ -72,7 +74,7 @@
 					allResults.push({
 						description,
 						css,
-						result: testResult,
+						result: average(testResult),
 					});
 				}
 

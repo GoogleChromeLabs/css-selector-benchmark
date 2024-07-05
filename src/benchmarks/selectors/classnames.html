@@ -45,8 +45,10 @@
 		const runTest = (description, selector) => new Promise((resolve, reject) => {
 			PerfTestRunner.measureRunsPerSecond({
 				description: `Selector Test ${description}`,
-				run: function() {
+				setup: () => {
 					setCSS(`${selector} { color: red; }`);
+				},
+				run: function() {
 					getComputedStyle($container); // force recalc style
 				},
 				iterationCount: 5,
@@ -55,6 +57,7 @@
 			});
 		});
 
+		const average = array => array.reduce((a, b) => a + b) / array.length;
 		window.startTest = () =>
 			new Promise(async (resolve, reject) => {
 				const allResults = [];
@@ -64,7 +67,7 @@
 					allResults.push({
 						description,
 						selector,
-						result: testResult,
+						result: average(testResult),
 					});
 				}
 
