@@ -8,8 +8,7 @@
     "start": "serve src",
     "lint": "prettier --check '{src,test,cli}/**/*.{ts,tsx,js,jsx,html,css}'",
     "format": "prettier --write '{src,test,cli}/**/*.{ts,tsx,js,jsx,html,css}'",
-	"bench": "node cli/index.js",
-	"benchmark": "node cli/index.js",
+    "benchmark": "node cli/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -25,10 +24,10 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "prettier": "^2.8.4",
-    "serve": "^14.2.0"
+    "prettier": "^3.3.2",
+    "serve": "^14.2.3"
   },
   "dependencies": {
-    "puppeteer": "^19.7.2"
+    "puppeteer": "^22.12.1"
   }
 }

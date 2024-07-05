@@ -12,6 +12,13 @@ Install dependencies
 npm i
 ```
 
+Install browsers to test with
+
+```bash
+npx puppeteer browsers install chrome
+npx puppeteer browsers install firefox
+```
+
 ### Start the web server
 
 The benchmarks are HTML pages which need to be served by a web server
