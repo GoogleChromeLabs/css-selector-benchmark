@@ -222,6 +222,7 @@
 			'Registered Custom Property that does not inherit with 25000 other registered custom props': testRegisteredNoInheritMoreRegistered,
 		}
 
+		const average = array => array.reduce((a, b) => a + b) / array.length;
 		window.startTest = () =>
 			new Promise(async (resolve, reject) => {
 				const allResults = [];
@@ -230,7 +231,7 @@
 					const testResult = await test(description);
 					allResults.push({
 						description,
-						result: testResult,
+						result: average(testResult),
 					});
 				}
 
