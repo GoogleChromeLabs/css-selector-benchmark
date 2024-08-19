@@ -29,7 +29,7 @@
 		}
 
 		makeTree($container, 1000);
-		$container.offsetHeight; // force recalc style
+		window.getComputedStyle(document.documentElement).getPropertyValue('zoom'); // force recalc style
 
 		function resetCSS() {
 			document.adoptedStyleSheets = [];
@@ -53,7 +53,7 @@
 				iterationCount: 20,
 				run: function() {
 					document.documentElement.style.setProperty('z-index', zIndex);
-					$container.offsetHeight;
+					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
 					zIndex = (zIndex == 1) ? 2 : 1;
 				},
 				teardown: function() {
@@ -75,8 +75,8 @@
 				description,
 				iterationCount: 20,
 				run: function() {
-					$container.offsetHeight;
 					document.documentElement.style.setProperty('color', colors[i]);
+					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
 					i = (i == 0) ? 1 : 0;
 				},
 				teardown: function() {
@@ -98,7 +98,7 @@
 				description,
 				run: function() {
 					document.documentElement.style.setProperty('--unregistered', i);
-					$container.offsetHeight;
+					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
 					i = (i == 0) ? 1 : 0;
 				},
 				iterationCount: 20,
@@ -129,7 +129,7 @@
 				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered', i);
-					$container.offsetHeight;
+					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
 					i = (i == 0) ? 1 : 0;
 				},
 				teardown: function() {
@@ -161,7 +161,7 @@
 				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered-no-inherit', i);
-					$container.offsetHeight;
+					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
 					i = (i == 0) ? 1 : 0;
 				},
 				teardown: function() {
@@ -213,7 +213,7 @@
 				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered-no-inherit', i);
-					$container.offsetHeight;
+					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
 					i = (i == 0) ? 1 : 0;
 				},
 				after: function() {
