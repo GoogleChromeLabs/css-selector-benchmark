@@ -170,6 +170,8 @@ function start(test, scheduler, runner) {
 
 	if (currentTest.description) PerfTestRunner.logInfo('Description: ' + currentTest.description);
 
+	if (currentTest.bootstrap) currentTest.bootstrap();
+
 	if (test.tracingCategories && !test.traceEventsToMeasure) {
 		PerfTestRunner.logFatalError("test's tracingCategories is " + "specified but test's traceEventsToMeasure is empty");
 		return;

@@ -5,23 +5,6 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Test</title>
-	<style>
-		@property --registered {
-			syntax: "<number>";
-			initial-value: 0;
-			inherits: true;
-		}
-		@property --registered-no-inherit {
-			syntax: "<number>";
-			initial-value: 0;
-			inherits: false;
-		}
-		:root {
-			--unregistered: 0;
-			--registered: 0;
-			--registered-no-inherit: 0;
-		}
-	</style>
 	<script type="module">
 		import PerfTestRunner from '/lib/PerfTestRunner.js';
 		import { createElement } from '/lib/DOM.js';
@@ -67,13 +50,13 @@
 			let zIndex = 1;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
+				iterationCount: 20,
 				run: function() {
 					document.documentElement.style.setProperty('z-index', zIndex);
 					$container.offsetHeight;
 					zIndex = (zIndex == 1) ? 2 : 1;
 				},
-				iterationCount: 5,
-				teardown: () => {
+				teardown: function() {
 					document.documentElement.style.removeProperty('z-index');
 				},
 				done: resolve,
@@ -90,13 +73,13 @@
 			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
+				iterationCount: 20,
 				run: function() {
 					document.documentElement.style.setProperty('color', `colors[i]}`);
 					$container.offsetHeight;
 					i = (i == 0) ? 1 : 0;
 				},
-				iterationCount: 5,
-				teardown: () => {
+				teardown: function() {
 					document.documentElement.style.removeProperty('color');
 				},
 				done: resolve,
@@ -118,8 +101,8 @@
 					$container.offsetHeight;
 					i = (i == 0) ? 1 : 0;
 				},
-				iterationCount: 5,
-				teardown: () => {
+				iterationCount: 20,
+				teardown: function() {
 					document.documentElement.style.removeProperty('--unregistered');
 				},
 				done: resolve,
@@ -136,16 +119,26 @@
 			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
+				iterationCount: 20,
+				bootstrap: function() {
+					setCSS(`@property --registered {
+						syntax: "<number>";
+						initial-value: 0;
+						inherits: true;
+					}`);
+				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered', i);
 					$container.offsetHeight;
 					i = (i == 0) ? 1 : 0;
 				},
-				iterationCount: 5,
-				teardown: () => {
+				teardown: function() {
 					document.documentElement.style.removeProperty('--registered');
 				},
-				done: resolve,
+				done: (results) => {
+					resetCSS();
+					resolve(results);
+				},
 			});
 		});
 
@@ -158,16 +151,26 @@
 			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
+				iterationCount: 20,
+				bootstrap: function() {
+					setCSS(`@property --registered-no-inherit {
+						syntax: "<number>";
+						initial-value: 0;
+						inherits: false;
+					}`);
+				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered-no-inherit', i);
 					$container.offsetHeight;
 					i = (i == 0) ? 1 : 0;
 				},
-				iterationCount: 5,
-				teardown: () => {
+				teardown: function() {
 					document.documentElement.style.removeProperty('--registered-no-inherit');
 				},
-				done: resolve,
+				done: (results) => {
+					resetCSS();
+					resolve(results);
+				},
 			});
 		});
 
@@ -181,29 +184,39 @@
 			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
-				setup: () => {
-					// Already setup
-					if (document.adoptedStyleSheets.length == 2) return;
+				iterationCount: 20,
+				bootstrap: function() {
+					let css = '';
 
+					// Single registration
+					css += `@property --registered-no-inherit {
+						syntax: "<number>";
+						initial-value: 0;
+						inherits: false;
+					}`;
+
+					// 25k other registrations
 					let propertyRegistrations = [];
 					let declarations = [];
 					for (let i = 0; i < 25000; i++) {
 						propertyRegistrations.push(`@property --custom-${i} { syntax: "<number>"; initial-value: 0; inherits: true; }`);
 						declarations.push(`--custom-${i}: ${i}`);
 					}
-					setCSS(propertyRegistrations.join("\n"));
+					css += "\n" + propertyRegistrations.join("\n");
 
+					// Uses the 25k other registrations
 					let rule = ':root { … }';
 					rule.replace(`…`, declarations.join("\n"));
-					setCSS(rule);
+					css += "\n" + rule;
+
+					setCSS(css);
 				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered-no-inherit', i);
 					$container.offsetHeight;
 					i = (i == 0) ? 1 : 0;
 				},
-				iterationCount: 5,
-				teardown: () => {
+				after: function() {
 					document.documentElement.style.removeProperty('--registered-no-inherit');
 				},
 				done: (results) => {
@@ -214,10 +227,10 @@
 		});
 
 		const tests = {
-			'Regular Property that does not inherit': testRegularPropNoInherit,
 			'Regular Property that does inherit': testRegularPropWithInherit,
 			'Unregistered Custom Property': testUnRegistered,
-			'Registered Custom Property': testRegistered,
+			'Registered Custom Property that inherits': testRegistered,
+			'Regular Property that does not inherit': testRegularPropNoInherit,
 			'Registered Custom Property that does not inherit': testRegisteredNoInherit,
 			'Registered Custom Property that does not inherit with 25000 other registered custom props': testRegisteredNoInheritMoreRegistered,
 		}
