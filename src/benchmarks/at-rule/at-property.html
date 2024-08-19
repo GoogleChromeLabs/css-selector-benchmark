@@ -75,8 +75,8 @@
 				description,
 				iterationCount: 20,
 				run: function() {
-					document.documentElement.style.setProperty('color', `colors[i]}`);
 					$container.offsetHeight;
+					document.documentElement.style.setProperty('color', colors[i]);
 					i = (i == 0) ? 1 : 0;
 				},
 				teardown: function() {
