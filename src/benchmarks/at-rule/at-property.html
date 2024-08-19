@@ -64,11 +64,13 @@
 		 * DevTools tells me a single style recalc in run() takes 8µs.
 		 */
 		const testRegularPropNoInherit = (description) => new Promise((resolve, reject) => {
+			let zIndex = 1;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
 				run: function() {
-					document.documentElement.style.setProperty('z-index', Math.round(Math.random() * 100));
+					document.documentElement.style.setProperty('z-index', zIndex);
 					$container.offsetHeight;
+					zIndex = (zIndex == 1) ? 2 : 1;
 				},
 				iterationCount: 5,
 				teardown: () => {
@@ -84,11 +86,14 @@
 		 * DevTools tells me a single style recalc in run() takes ±4.5ms.
 		 */
 		const testRegularPropWithInherit = (description) => new Promise((resolve, reject) => {
+			const colors = ['#000', '#fff'];
+			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
 				run: function() {
-					document.documentElement.style.setProperty('color', `#${Math.floor(Math.random()*16777215).toString(16)}`);
+					document.documentElement.style.setProperty('color', `colors[i]}`);
 					$container.offsetHeight;
+					i = (i == 0) ? 1 : 0;
 				},
 				iterationCount: 5,
 				teardown: () => {
@@ -105,11 +110,13 @@
 		 * This is a little bit slower but not really different from a regular property that inherits.
 		 */
 		const testUnRegistered = (description) => new Promise((resolve, reject) => {
+			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
 				run: function() {
-					document.documentElement.style.setProperty('--unregistered', Math.random());
+					document.documentElement.style.setProperty('--unregistered', i);
 					$container.offsetHeight;
+					i = (i == 0) ? 1 : 0;
 				},
 				iterationCount: 5,
 				teardown: () => {
@@ -126,11 +133,13 @@
 		 * This is no different than an unregistered custom prop.
 		 */
 		const testRegistered = (description) => new Promise((resolve, reject) => {
+			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
 				run: function() {
-					document.documentElement.style.setProperty('--registered', Math.random());
+					document.documentElement.style.setProperty('--registered', i);
 					$container.offsetHeight;
+					i = (i == 0) ? 1 : 0;
 				},
 				iterationCount: 5,
 				teardown: () => {
@@ -146,11 +155,13 @@
 		 * DevTools tells me a single style recalc in run() takes 8µs
 		 */
 		const testRegisteredNoInherit = (description) => new Promise((resolve, reject) => {
+			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
 				run: function() {
-					document.documentElement.style.setProperty('--registered-no-inherit', Math.random());
+					document.documentElement.style.setProperty('--registered-no-inherit', i);
 					$container.offsetHeight;
+					i = (i == 0) ? 1 : 0;
 				},
 				iterationCount: 5,
 				teardown: () => {
@@ -167,6 +178,7 @@
 		 * This was checked using DevTools
 		 */
 		const testRegisteredNoInheritMoreRegistered = (description) => new Promise((resolve, reject) => {
+			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
 				setup: () => {
@@ -177,7 +189,7 @@
 					let declarations = [];
 					for (let i = 0; i < 25000; i++) {
 						propertyRegistrations.push(`@property --custom-${i} { syntax: "<number>"; initial-value: 0; inherits: true; }`);
-						declarations.push(`--custom-${i}: ${Math.random()}`);
+						declarations.push(`--custom-${i}: ${i}`);
 					}
 					setCSS(propertyRegistrations.join("\n"));
 
@@ -186,8 +198,9 @@
 					setCSS(rule);
 				},
 				run: function() {
-					document.documentElement.style.setProperty('--registered-no-inherit', Math.random());
+					document.documentElement.style.setProperty('--registered-no-inherit', i);
 					$container.offsetHeight;
+					i = (i == 0) ? 1 : 0;
 				},
 				iterationCount: 5,
 				teardown: () => {
