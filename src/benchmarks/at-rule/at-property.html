@@ -54,7 +54,7 @@
 				iterationCount,
 				run: function() {
 					document.documentElement.style.setProperty('z-index', zIndex);
-					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
+					window.getComputedStyle(document.documentElement).getPropertyValue('z-index');
 					zIndex = (zIndex == 1) ? 2 : 1;
 				},
 				teardown: function() {
@@ -96,7 +96,7 @@
 				description,
 				run: function() {
 					document.documentElement.style.setProperty('--unregistered', i);
-					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
+					window.getComputedStyle(document.documentElement).getPropertyValue('--unregistered');
 					i = (i == 0) ? 1 : 0;
 				},
 				iterationCount,
@@ -127,7 +127,7 @@
 				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered', i);
-					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
+					window.getComputedStyle(document.documentElement).getPropertyValue('--registered');
 					i = (i == 0) ? 1 : 0;
 				},
 				teardown: function() {
@@ -159,7 +159,7 @@
 				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered-no-inherit', i);
-					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
+					window.getComputedStyle(document.documentElement).getPropertyValue('--registered-no-inherit');
 					i = (i == 0) ? 1 : 0;
 				},
 				teardown: function() {
@@ -211,7 +211,7 @@
 				},
 				run: function() {
 					document.documentElement.style.setProperty('--registered-no-inherit', i);
-					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
+					window.getComputedStyle(document.documentElement).getPropertyValue('--registered-no-inherit');
 					i = (i == 0) ? 1 : 0;
 				},
 				after: function() {
