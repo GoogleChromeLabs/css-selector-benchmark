@@ -10,6 +10,7 @@
 		import { createElement } from '/lib/DOM.js';
 
 		const $container = document.querySelector('#container');
+		const iterationCount = 10;
 
 		function makeTree(parentEl, numSiblings) {
 			for (var i = 0; i <= numSiblings; i++) {
@@ -50,7 +51,7 @@
 			let zIndex = 1;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
-				iterationCount: 20,
+				iterationCount,
 				run: function() {
 					document.documentElement.style.setProperty('z-index', zIndex);
 					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
@@ -73,7 +74,7 @@
 			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
-				iterationCount: 20,
+				iterationCount,
 				run: function() {
 					document.documentElement.style.setProperty('color', colors[i]);
 					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
@@ -101,7 +102,7 @@
 					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
 					i = (i == 0) ? 1 : 0;
 				},
-				iterationCount: 20,
+				iterationCount,
 				teardown: function() {
 					document.documentElement.style.removeProperty('--unregistered');
 				},
@@ -119,7 +120,7 @@
 			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
-				iterationCount: 20,
+				iterationCount,
 				bootstrap: function() {
 					setCSS(`@property --registered {
 						syntax: "<number>";
@@ -151,7 +152,7 @@
 			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
-				iterationCount: 20,
+				iterationCount,
 				bootstrap: function() {
 					setCSS(`@property --registered-no-inherit {
 						syntax: "<number>";
@@ -184,7 +185,7 @@
 			let i = 0;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
-				iterationCount: 20,
+				iterationCount,
 				bootstrap: function() {
 					let css = '';
 
