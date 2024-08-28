@@ -66,22 +66,19 @@
 
 		/**
 		 * This test tests the influence of changing a property that inherits.
-		 *
-		 * DevTools tells me a single style recalc in run() takes ±4.5ms.
 		 */
-		const testRegularPropWithInherit = (description) => new Promise((resolve, reject) => {
-			const colors = ['#000', '#fff'];
-			let i = 0;
+		const testRegularPropWithInherit = (property, value1, value2) => (description) => new Promise((resolve, reject) => {
+			let value = value1;
 			PerfTestRunner.measureRunsPerSecond({
 				description,
 				iterationCount,
 				run: function() {
-					document.documentElement.style.setProperty('color', colors[i]);
-					window.getComputedStyle(document.documentElement).getPropertyValue('zoom');
-					i = (i == 0) ? 1 : 0;
+					document.documentElement.style.setProperty(property, value);
+					window.getComputedStyle(document.documentElement).getPropertyValue(property); // Force style recalc
+					value = (value == value1) ? value2 : value1;
 				},
 				teardown: function() {
-					document.documentElement.style.removeProperty('color');
+					document.documentElement.style.removeProperty(property);
 				},
 				done: resolve,
 			});
@@ -228,10 +225,19 @@
 		});
 
 		const tests = {
-			'Regular Property that does inherit': testRegularPropWithInherit,
+			'Regular Property that does not inherit': testRegularPropNoInherit,
+			'Regular Property that does inherit (color)': testRegularPropWithInherit('color', '#fff', '#000'),
+			'Regular Property that does inherit (direction)': testRegularPropWithInherit('direction', 'rtl', 'ltr'),
+			'Regular Property that does inherit (mix-blend-mode)': testRegularPropWithInherit('mix-blend-mode', 'multiply', 'normal'),
+			'Regular Property that does inherit (overscroll-behavior-y)': testRegularPropWithInherit('overscroll-behavior-y', 'contain', 'none'),
+			'Regular Property that does inherit (pointer-events)': testRegularPropWithInherit('pointer-events', 'none', 'auto'),
+			'Regular Property that does inherit (scrollbar-color)': testRegularPropWithInherit('scrollbar-color', '#fff', '#000'),
+			'Regular Property that does inherit (color-scheme)': testRegularPropWithInherit('color-scheme', 'light', 'dark'),
+			'Regular Property that does inherit (text-rendering)': testRegularPropWithInherit('text-rendering', 'optimizespeed', 'optimizelegibility'),
+			'Regular Property that does inherit (cursor)': testRegularPropWithInherit('cursor', 'zoom-in', 'default'),
+			'Regular Property that does inherit (speak)': testRegularPropWithInherit('speak', 'normal', 'spell-out'),
 			'Unregistered Custom Property': testUnRegistered,
 			'Registered Custom Property that inherits': testRegistered,
-			'Regular Property that does not inherit': testRegularPropNoInherit,
 			'Registered Custom Property that does not inherit': testRegisteredNoInherit,
 			'Registered Custom Property that does not inherit with 25000 other registered custom props': testRegisteredNoInheritMoreRegistered,
 		}
