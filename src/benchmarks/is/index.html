@@ -43,29 +43,42 @@
 
 		const selectors = {
 			'*': '*',
+
 			'ul': 'ul',
-			'ul:is(.tagDiv .layer2 *)': 'ul:is(.tagDiv .layer2 *)',
+			':is(ul)': ':is(ul)',
+			':where(ul)': ':where(ul)',
+
 			'ul:is(.tagDiv .layer2 *):is(ul)': 'ul:is(.tagDiv .layer2 *):is(ul)',
 			'ul:is(.tagDiv .layer2 ul)': 'ul:is(.tagDiv .layer2 ul)',
-			'ul:where(.tagDiv .layer2 *)': 'ul:where(.tagDiv .layer2 *)',
+
 			'ul:where(.tagDiv .layer2 *):where(ul)': 'ul:where(.tagDiv .layer2 *):where(ul)',
 			'ul:where(.tagDiv .layer2 ul)': 'ul:where(.tagDiv .layer2 ul)',
+
 			'.tagDiv .layer2 ul': '.tagDiv .layer2 ul',
+			':is(.tagDiv .layer2 ul)': ':is(.tagDiv .layer2 ul)',
+			':where(.tagDiv .layer2 ul)': ':where(.tagDiv .layer2 ul)',
 		}
 
 		const runTest = (description, selector) => new Promise((resolve, reject) => {
 			PerfTestRunner.measureRunsPerSecond({
 				description: `Selector Test ${description}`,
-				run: function() {
+				bootstrap: () => {
 					setCSS(`${selector} { color: red; }`);
-					$container.offsetHeight; // force recalc style
 				},
-				iterationCount: 2,
-				teardown: resetCSS,
-				done: resolve,
+				run: function() {
+					// $container.offsetHeight; // force recalc style
+					const results = document.querySelectorAll(selector);
+					const s = results.length;
+				},
+				iterationCount: 5,
+				done: (results) => {
+					resetCSS();
+					resolve(results);
+				},
 			});
 		});
 
+		const average = array => array.reduce((a, b) => a + b) / array.length;
 		window.startTest = () =>
 			new Promise(async (resolve, reject) => {
 				const allResults = [];
@@ -74,12 +87,11 @@
 					const testResult = await runTest(description, selector);
 					allResults.push({
 						description,
-						selector,
-						result: testResult,
+						result: average(testResult),
 					});
 				}
 
-				resolve(allResults);
+				resolve(allResults.sort((r1, r2) => r2.result - r1.result));
 			});
 	</script>
 </head>
