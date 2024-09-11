@@ -42,37 +42,26 @@
 		}
 
 		const selectors = {
-			'*': '*',
-
 			'ul': 'ul',
 			':is(ul)': ':is(ul)',
+			':is(ul, .inexistent)': ':is(ul, .inexistent)',
 			':where(ul)': ':where(ul)',
-
-			'ul:is(.tagDiv .layer2 *):is(ul)': 'ul:is(.tagDiv .layer2 *):is(ul)',
-			'ul:is(.tagDiv .layer2 ul)': 'ul:is(.tagDiv .layer2 ul)',
-
-			'ul:where(.tagDiv .layer2 *):where(ul)': 'ul:where(.tagDiv .layer2 *):where(ul)',
-			'ul:where(.tagDiv .layer2 ul)': 'ul:where(.tagDiv .layer2 ul)',
-
-			'.tagDiv .layer2 ul': '.tagDiv .layer2 ul',
-			':is(.tagDiv .layer2 ul)': ':is(.tagDiv .layer2 ul)',
-			':where(.tagDiv .layer2 ul)': ':where(.tagDiv .layer2 ul)',
+			':where(ul, .inexistent)': ':where(ul, .inexistent)',
 		}
 
 		const runTest = (description, selector) => new Promise((resolve, reject) => {
 			PerfTestRunner.measureRunsPerSecond({
 				description: `Selector Test ${description}`,
-				bootstrap: () => {
-					setCSS(`${selector} { color: red; }`);
+				setup: () => {
+					setCSS(`#container.active ${selector} { outline: 1px solid red; }`);
 				},
 				run: function() {
-					// $container.offsetHeight; // force recalc style
-					const results = document.querySelectorAll(selector);
-					const s = results.length;
+					$container.classList.toggle('active');
+					getComputedStyle($container).getPropertyValue('--trigger'); // Trigger style invalidation
 				},
-				iterationCount: 5,
+				iterationCount: 2,
+				tearDown: resetCSS,
 				done: (results) => {
-					resetCSS();
 					resolve(results);
 				},
 			});
@@ -91,7 +80,17 @@
 					});
 				}
 
-				resolve(allResults.sort((r1, r2) => r2.result - r1.result));
+				const max = Math.max(...allResults.map(r => r.result));
+				resolve(
+					allResults
+					.map(r => {
+						r.perc =(r.result / max * 100).toFixed(2) + '%';
+						return r;
+					})
+					.sort((r1, r2) => {
+						return r2.result - r1.result;
+					})
+				);
 			});
 	</script>
 </head>
