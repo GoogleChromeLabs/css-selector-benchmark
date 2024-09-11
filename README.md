@@ -39,6 +39,8 @@ npm run benchmark example
 
 This will run the benchmark served by `http://localhost:3000/benchmarks/example/`, whose source is located at `./src/benchmarks/example/index.html`
 
+Note: You can also run benchmarks directly in a browser. To do so, visit its URL and invoke `window.startTest().then(console.table);` on the Console.
+
 ## Creating a benchmark
 
 Benchmarks are HTML pages stored in a subfolder in `./src/benchmarks/`. The page **MUST** expose a `window.startTest` method which returns a promise. When the test logic is done, it **MUST** resolve that promise.
