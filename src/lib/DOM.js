@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 const createElement = (tagName, options = null) => {
 	const { children, ...rest } = options ?? {};
 

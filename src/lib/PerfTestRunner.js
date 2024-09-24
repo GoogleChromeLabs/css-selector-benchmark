@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // This file is a slightly modified version of the one found in the Chromium source repository
 // https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/perf_tests/resources/runner.js
 

@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import puppeteer from 'puppeteer';
 
 if (!process.argv[2]) {

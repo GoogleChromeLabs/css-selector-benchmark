@@ -1,3 +1,8 @@
+/**
+ * Copyright 2024 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Util functions from the Puppeteer Recorder in DevTools
 
 async function waitForSelectors(selectors, frame, options = {}) {
