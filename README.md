@@ -41,6 +41,27 @@ This will run the benchmark served by `http://localhost:3000/benchmarks/example/
 
 Note: You can also run benchmarks directly in a browser. To do so, visit its URL and invoke `window.startTest().then(console.table);` on the Console.
 
+### Choosing which browser to run the benchmarks in
+
+To select which browser to test things in, use the `--browser` option.
+
+```bash
+npm run benchmark example -- --browser=firefox
+```
+
+Supported options:
+
+- `chrome` = Use Chrome
+- `firefox`= Use Firefox
+
+The default used browser is `chrome`.
+
+A note will be printed on screen to show which version you are using. For example:
+
+```
+ℹ️ Running benchmark using browser firefox (firefox/129.0a1)
+```
+
 ## Creating a benchmark
 
 Benchmarks are HTML pages stored in a subfolder in `./src/benchmarks/`. The page **MUST** expose a `window.startTest` method which returns a promise. When the test logic is done, it **MUST** resolve that promise.
