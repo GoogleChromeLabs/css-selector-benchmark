@@ -52,6 +52,10 @@ npm run benchmark example -- --browser=firefox
 Supported options:
 
 - `chrome` = Use Chrome
+  - `chrome` = Use Chrome Stable
+  - `chrome-beta` = Use Chrome Beta
+  - `chrome-dev` = Use Chrome Dev
+  - `chrome-canary` = Use Chrome Canary
 - `firefox`= Use Firefox
 
 The default used browser is `chrome`.

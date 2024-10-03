@@ -18,20 +18,42 @@ const pageUrl = `http://localhost:3000/benchmarks/${process.argv[2]}`.trim();
 
 // Determine which browser to use
 const supportedBrowsers = ['chrome', 'firefox'];
-let requestedBrowser = flags.filter(f => f.startsWith('--browser=')).reduce((p, c) => `${p}${c}`, '');
-if (requestedBrowser) {
-	requestedBrowser = requestedBrowser.replace('--browser=', '');
+const supportedBrowserChannels = {
+	'chrome': ['chrome', 'chrome-beta', 'chrome-canary', 'chrome-dev'],
+	'firefox': null,
+};
 
+let requestedBrowser = flags.filter(f => f.startsWith('--browser=')).reduce((p, c) => `${p}${c}`, '');
+let requestedBrowserChannel;
+
+if (requestedBrowser) {
+	requestedBrowserChannel = requestedBrowser.replace('--browser=', '');
+	requestedBrowser = requestedBrowser.replace('--browser=', '').split('-')[0];
+
+	// Check if browser is suppported
 	if (!supportedBrowsers.includes(requestedBrowser)) {
-		console.error(`❌ Invalid browser. Only accepted values are ${supportedBrowsers.join(', ')}`);
+		console.error(`❌ Invalid browser “${requestedBrowser}”. Only accepted values are ${supportedBrowsers.join(', ')}`);
 		process.exit(1);
 	}
+
+	// Check if channel is supported
+	if (supportedBrowserChannels[requestedBrowser]) {
+		if (!supportedBrowserChannels[requestedBrowser].includes(requestedBrowserChannel)) {
+			console.error(`❌ Invalid browserChannel “${requestedBrowserChannel}” for browser “${requestedBrowser}”. Only accepted values are ${supportedBrowserChannels[requestedBrowser].join(', ')}`);
+			process.exit(1);
+		}
+	} else {
+		requestedBrowserChannel = null;
+	}
+
 } else {
 	requestedBrowser = supportedBrowsers[0];
+	requestedBrowserChannel = supportedBrowserChannels[requestedBrowser] ? supportedBrowserChannels[requestedBrowser][0] : null;
 }
 
 const puppeteerOptions = {
 	'chrome': {
+		channel: requestedBrowserChannel,
 		headless: 'new',
 		args: [
 			"--flag-switches-begin",
