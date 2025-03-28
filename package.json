@@ -28,6 +28,6 @@
     "serve": "^14.2.3"
   },
   "dependencies": {
-    "puppeteer": "^22.12.1"
+    "puppeteer": "^22.15.0"
   }
 }
