@@ -74,7 +74,7 @@
 				},
 				run: function() {
 					document.documentElement.style.setProperty('--value', Math.round(Math.random() * 100));
-					getComputedStyle(document.documentElement).getPropertyValue('--value'); // Trigger style invalidation
+					getComputedStyle($container).getPropertyValue('--value'); // Trigger style invalidation
 				},
 				iterationCount: 5,
 				tearDown: resetCSS,
