@@ -69,7 +69,7 @@
 					  initial-value: 0;
 					}
 					${selector} {
-					  --value: sibling-count();
+					  --value: 1;
 					  ${Array.from({ length: numProps }, (_, i) => `--prop-${i}: ${i};`).join('')}
 					}`);
 				},
