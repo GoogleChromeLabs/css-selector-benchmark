@@ -66,6 +66,37 @@ A note will be printed on screen to show which version you are using. For exampl
 ℹ️ Running benchmark using browser firefox (firefox/129.0a1)
 ```
 
+### Reading the results
+
+When a benchmark completes, results are printed to the console as an array of objects.
+
+For example, running `npm run benchmark btn` yields output like:
+
+```
+{
+  scenario: '1 class',
+  selector: '.btn',
+  description: '1 Class: .btn',
+  result: 6265.73,
+  perc: '100.00%'
+}
+{
+  scenario: '1 class',
+  selector: '[class^="btn-"]',
+  description: '1 Class: [class^="btn-"]',
+  result: 659.47,
+  perc: '10.53%'
+}
+```
+
+Here is what each field represents:
+
+- `scenario`: The DOM scenario or test environment variation being evaluated (e.g. elements with `1 class`).
+- `selector`: The CSS selector being tested (e.g. `.btn` or `[class^="btn-"]`).
+- `description`: A human-readable description of the specific test case.
+- `result`: The performance score measured in **runs per second** (`runs/s`). **Higher is better/faster.** In this example, `.btn` achieved ~6,265.73 runs per second, whereas `[class^="btn-"]` achieved ~659.47 runs per second.
+- `perc`: The relative performance compared to the fastest test case in the benchmark suite (`(result / max) * 100`). The fastest result is normalized to `100.00%`, while `10.53%` indicates that `[class^="btn-"]` ran at ~10.5% the speed of the fastest selector (roughly 9.5× slower).
+
 ## Creating a benchmark
 
 Benchmarks are HTML pages stored in a subfolder in `./src/benchmarks/`. The page **MUST** expose a `window.startTest` method which returns a promise. When the test logic is done, it **MUST** resolve that promise.
