@@ -9,6 +9,8 @@
     "lint": "prettier --check '{src,test,cli}/**/*.{ts,tsx,js,jsx,html,css}'",
     "format": "prettier --write '{src,test,cli}/**/*.{ts,tsx,js,jsx,html,css}'",
     "benchmark": "node cli/index.js",
+    "create": "node cli/create.js",
+    "create-benchmark": "node cli/create.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
