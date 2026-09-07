@@ -11,6 +11,7 @@
     "benchmark": "node cli/index.js",
     "create": "node cli/create.js",
     "create-benchmark": "node cli/create.js",
+    "deploy": "gcloud storage rsync --recursive --delete-unmatched-destination-objects src gs://chrome-dev-demos/public/css-selector-benchmark",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
