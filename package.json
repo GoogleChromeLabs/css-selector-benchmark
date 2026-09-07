@@ -35,10 +35,10 @@
   "homepage": "https://github.com/GoogleChromeLabs/css-selector-benchmark#readme",
   "license": "Apache-2.0",
   "devDependencies": {
-    "prettier": "^3.3.2",
-    "serve": "^14.2.3"
+    "prettier": "^3.9.6",
+    "serve": "^14.2.6"
   },
   "dependencies": {
-    "puppeteer": "^22.12.1"
+    "puppeteer": "^25.10.0"
   }
 }
