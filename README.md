@@ -1,49 +1,69 @@
 # CSS Selector Benchmark
 
-CSS Selector Benchmarks, using PerfTestRunner and Puppeteer
+A suite of CSS Selector Benchmarks measuring style recalculation, invalidation, and selector matching performance across modern browser engines using Chromium’s `PerfTestRunner` and Puppeteer.
+
+-   **GitHub Repository**: [https://github.com/GoogleChromeLabs/css-selector-benchmark](https://github.com/GoogleChromeLabs/css-selector-benchmark)
+-   **Live Demo**: [https://chrome.dev/css-selector-benchmark](https://chrome.dev/css-selector-benchmark)
 
 ## Prerequisites
 
 ### Project Setup
 
-Install dependencies
+Install dependencies:
 
 ```bash
 npm i
 ```
 
-Install browsers to test with
+Install browsers to test with:
 
 ```bash
 npx puppeteer browsers install chrome
 npx puppeteer browsers install firefox
 ```
 
-### Start the web server
+### Start the Web Server
 
-The benchmarks are HTML pages which need to be served by a web server
+The benchmarks are HTML pages served by a local web server:
 
 ```bash
 npm run start
 ```
 
-The Web Server is now running at http://localhost:3000/
+The web server will start at `http://localhost:3000/` (or another available port).
 
-## Running a benchmark
+---
 
-With the Web Server running, invoke a benchmark on the CLI:
+## Running Benchmarks
+
+Benchmarks can be run in two ways: **visually in the browser** or **headlessly via the CLI**.
+
+### 1. Visually in the Browser
+
+Open `http://localhost:3000/` (or visit [https://chrome.dev/css-selector-benchmark](https://chrome.dev/css-selector-benchmark)) to access the main suite index:
+
+-   **Suite Index (`/`)**: Browse all available benchmarks with real-time search, category filters (`:has()`, `:nth-child()`, `@scope`, `At-Rules`, `Class & Attribute`, `Combinators`, etc.), and CLI command tips.
+-   **Benchmark Runner Page**: Clicking any benchmark opens its visual facade runner:
+    -   Click the **"Run Benchmark"** button to execute the test suite in an isolated iframe.
+    -   Watch live status indicators update as each test runs.
+    -   View pre-populated results tables with runs per second (`runs/s`) and relative performance comparison bars.
+    -   Use the **"← Back to index"** pill link at the top to return to the suite overview.
+
+> You can also run the benchmark directly via the DevTools Console on any benchmark page by calling `window.startTest().then(console.table);`.
+
+### 2. Headlessly via the CLI
+
+With the web server running, invoke any benchmark using the CLI:
 
 ```bash
 npm run benchmark example
 ```
 
-This will run the benchmark served by `http://localhost:3000/benchmarks/example/`, whose source is located at `./src/benchmarks/example/index.html`
+This runs the benchmark via Puppeteer in headless Chrome, logs progress, and outputs the collected results.
 
-Note: You can also run benchmarks directly in a browser. To do so, visit its URL and invoke `window.startTest().then(console.table);` on the Console.
+#### Choosing which browser to run the benchmarks in
 
-### Choosing which browser to run the benchmarks in
-
-To select which browser to test things in, use the `--browser` option.
+Use the `--browser` option to select the browser engine:
 
 ```bash
 npm run benchmark example -- --browser=firefox
@@ -51,28 +71,24 @@ npm run benchmark example -- --browser=firefox
 
 Supported options:
 
-- `chrome` = Use Chrome
-  - `chrome` = Use Chrome Stable
-  - `chrome-beta` = Use Chrome Beta
-  - `chrome-dev` = Use Chrome Dev
-  - `chrome-canary` = Use Chrome Canary
-- `firefox`= Use Firefox
+-   `chrome` = Use Chrome (default)
+    -   `chrome` = Chrome Stable
+    -   `chrome-beta` = Chrome Beta
+    -   `chrome-dev` = Chrome Dev
+    -   `chrome-canary` = Chrome Canary
+-   `firefox` = Use Firefox
 
-The default used browser is `chrome`.
-
-A note will be printed on screen to show which version you are using. For example:
+A notice is printed displaying the active browser version:
 
 ```
 ℹ️ Running benchmark using browser firefox (firefox/129.0a1)
 ```
 
-### Reading the results
+### Reading the Results
 
-When a benchmark completes, results are printed to the console as an array of objects.
+When a benchmark completes, results are formatted as an array of objects:
 
-For example, running `npm run benchmark btn` yields output like:
-
-```
+```javascript
 {
   scenario: '1 class',
   selector: '.btn',
@@ -89,36 +105,45 @@ For example, running `npm run benchmark btn` yields output like:
 }
 ```
 
-Here is what each field represents:
+-   `scenario`: The DOM scenario or test environment variation being evaluated.
+-   `selector`: The CSS selector being tested.
+-   `description`: A human-readable description of the specific test case.
+-   `result`: The performance score measured in **runs per second** (`runs/s`). **Higher is better/faster.**
+-   `perc`: Relative performance compared to the fastest test case in the benchmark (`(result / max) * 100`). The fastest result is normalized to `100.00%`.
 
-- `scenario`: The DOM scenario or test environment variation being evaluated (e.g. elements with `1 class`).
-- `selector`: The CSS selector being tested (e.g. `.btn` or `[class^="btn-"]`).
-- `description`: A human-readable description of the specific test case.
-- `result`: The performance score measured in **runs per second** (`runs/s`). **Higher is better/faster.** In this example, `.btn` achieved ~6,265.73 runs per second, whereas `[class^="btn-"]` achieved ~659.47 runs per second.
-- `perc`: The relative performance compared to the fastest test case in the benchmark suite (`(result / max) * 100`). The fastest result is normalized to `100.00%`, while `10.53%` indicates that `[class^="btn-"]` ran at ~10.5% the speed of the fastest selector (roughly 9.5× slower).
+---
 
-## Creating a benchmark
+## Creating a Benchmark
 
-Benchmarks are HTML pages stored in a subfolder in `./src/benchmarks/`. The page **MUST** expose a `window.startTest` method which returns a promise. When the test logic is done, it **MUST** resolve that promise.
+You can scaffold a new benchmark using the interactive creation script:
 
-This `window.startTest` is automatically invoked by `npm run benchmark x` when the page has loaded. Once `window.startTest` has resolved, the benchmark will be closed and any returned output will be logged.
-
-Using [Chromium’s `PerfTestRunner`](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/perf_tests/resources/runner.js), a typical test looks like this:
-
-```html
-<script type="module">
-import PerfTestRunner from '/lib/PerfTestRunner.js';
-
-window.startTest = () => new Promise((resolve, reject) => {
-	PerfTestRunner.measureRunsPerSecond({
-		description: 'This is an example benchmark',
-		run: function () {
-			// Benchmark logic here, e.g. a document.querySelectorAll call in a loop
-		},
-		done: resolve,
-	});
-});
-</script>
+```bash
+npm run create
 ```
 
-Naming your benchmark `index.html` is not required, but then you need to append the filename to the invocation, e.g. `npm run benchmark dom/qsa.html`.
+Or pass the benchmark name directly (names with slashes are supported):
+
+```bash
+npm run create has/new
+```
+
+### What the script does:
+
+1. **Collision check**: Ensures the benchmark name is not already taken; aborts with a warning if a collision is detected.
+2. **Scaffolds `tests.html`**: The underlying benchmark test file equipped with all necessary boilerplate:
+    - Chromium's `PerfTestRunner` integration (`measureRunsPerSecond`).
+    - DOM tree creation helper (`makeTree`).
+    - Dynamic stylesheet insertion and teardown using `adoptedStyleSheets` (`setCSS`, `resetCSS`).
+    - Sample selectors dictionary.
+    - `window.getTests()` and `window.startTest(onResult, onStart)` API hooks.
+3. **Scaffolds `index.html`**: The visual runner facade with:
+    - "← Back to index" navigation link.
+    - Live runner iframe delegator and progress reporting.
+    - Results table with performance bars.
+4. **Registers with the Suite Index**: Automatically adds the new benchmark entry to the `BENCHMARKS` array in `src/index.html`.
+
+Once created, you can immediately start editing `src/benchmarks/<name>/tests.html` to add your test selectors and run:
+
+```bash
+npm run benchmark <name>
+```
