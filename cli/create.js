@@ -73,6 +73,9 @@ function serializeBenchmarks(benchmarks) {
 const displayTitle = formatTitle(benchmarkName);
 const testRelPath = `${benchmarkName}/tests.html`;
 const currentYear = new Date().getFullYear();
+const depth = benchmarkName.split('/').length + 1;
+const relToSrc = '../'.repeat(depth);
+const relToLib = relToSrc + 'lib';
 
 const testsHtmlContent = `<!doctype html>
 <!--
@@ -86,8 +89,8 @@ const testsHtmlContent = `<!doctype html>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Test - ${displayTitle}</title>
 		<script type="module">
-			import PerfTestRunner from '/lib/PerfTestRunner.js';
-			import { createElement } from '/lib/DOM.js';
+			import PerfTestRunner from '${relToLib}/PerfTestRunner.js';
+			import { createElement } from '${relToLib}/DOM.js';
 
 			const $container = document.querySelector('#container');
 
@@ -799,7 +802,7 @@ const indexHtmlContent = `<!doctype html>
 	<body>
 		<div class="container">
 			<nav class="nav-back">
-				<a href="/" class="btn-back">&larr; Back to index</a>
+				<a href="${relToSrc}" class="btn-back">&larr; Back to index</a>
 			</nav>
 			<header>
 				<h1>CSS ${displayTitle} Benchmark</h1>
