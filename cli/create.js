@@ -49,6 +49,27 @@ function formatTitle(name) {
 		.join(' - ');
 }
 
+function getCategory(name) {
+	const first = name.split('/')[0].toLowerCase();
+	if (first === 'has') return ':has()';
+	if (first === 'nth-child-of-s' || first === 'nth-child') return ':nth-child()';
+	if (first === 'scope') return '@scope';
+	if (first === 'nesting') return 'Nesting';
+	if (first === 'is') return 'Pseudo-classes';
+	if (first === 'at-property' || first === 'at-rule') return 'At-Rules';
+	if (first === 'cssom') return 'CSSOM';
+	if (first === 'btn') return 'Class & Attribute';
+	if (first === 'selectors') return 'Combinators';
+	return formatTitle(first);
+}
+
+function serializeBenchmarks(benchmarks) {
+	const items = benchmarks.map((b) => {
+		return `\t\t\t\t{\n\t\t\t\t\tpath: '${b.path}',\n\t\t\t\t\tcli: '${b.cli}',\n\t\t\t\t\ttitle: '${b.title.replace(/'/g, "\\'")}',\n\t\t\t\t\tcategory: '${b.category.replace(/'/g, "\\'")}',\n\t\t\t\t\tdesc: '${b.desc.replace(/'/g, "\\'")}',\n\t\t\t\t\ttags: [${b.tags.map((t) => `'${t.replace(/'/g, "\\'")}'`).join(', ')}],\n\t\t\t\t}`;
+	});
+	return `[\n${items.join(',\n')},\n\t\t\t]`;
+}
+
 const displayTitle = formatTitle(benchmarkName);
 const testRelPath = `${benchmarkName}/tests.html`;
 const currentYear = new Date().getFullYear();
@@ -210,6 +231,33 @@ const indexHtmlContent = `<!doctype html>
 			.container {
 				max-width: 1080px;
 				margin: 0 auto;
+			}
+
+			.nav-back {
+				margin-bottom: 1.25rem;
+			}
+
+			.btn-back {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+				padding: 0.25rem 0.75rem;
+				border-radius: 9999px;
+				font-size: 0.8125rem;
+				font-weight: 500;
+				color: var(--accent);
+				background: transparent;
+				border: 1px solid var(--accent);
+				text-decoration: none;
+				transition:
+					background-color 0.15s ease,
+					color 0.15s ease,
+					border-color 0.15s ease;
+			}
+
+			.btn-back:hover {
+				background-color: var(--accent);
+				color: #ffffff;
 			}
 
 			header {
@@ -750,6 +798,9 @@ const indexHtmlContent = `<!doctype html>
 
 	<body>
 		<div class="container">
+			<nav class="nav-back">
+				<a href="/" class="btn-back">&larr; Back to index</a>
+			</nav>
 			<header>
 				<h1>CSS ${displayTitle} Benchmark</h1>
 				<p class="lead">Benchmark measuring style recalculation performance for ${displayTitle}.</p>
@@ -805,8 +856,44 @@ const indexHtmlContent = `<!doctype html>
 fs.writeFileSync(path.join(targetDir, 'index.html'), indexHtmlContent, 'utf-8');
 fs.writeFileSync(path.join(targetDir, 'tests.html'), testsHtmlContent, 'utf-8');
 
+// Update BENCHMARKS array in src/index.html
+const mainIndexPath = path.resolve(rootDir, 'src', 'index.html');
+if (fs.existsSync(mainIndexPath)) {
+	const mainIndexContent = fs.readFileSync(mainIndexPath, 'utf-8');
+	const benchmarksMatch = mainIndexContent.match(/const BENCHMARKS = (\[[\s\S]*?\n\t\t\t\]);/);
+	if (benchmarksMatch) {
+		try {
+			const benchmarks = eval(benchmarksMatch[1]);
+			const newEntry = {
+				path: `benchmarks/${benchmarkName}/`,
+				cli: benchmarkName,
+				title: displayTitle.toLowerCase().startsWith('css') ? displayTitle : `CSS ${displayTitle}`,
+				category: getCategory(benchmarkName),
+				desc: `Benchmark measuring style recalculation performance for ${displayTitle}.`,
+				tags: [benchmarkName.split('/').pop(), 'recalc', 'benchmark'],
+			};
+
+			const existingIndex = benchmarks.findIndex((b) => b.cli === benchmarkName);
+			if (existingIndex >= 0) {
+				benchmarks[existingIndex] = newEntry;
+			} else {
+				benchmarks.push(newEntry);
+			}
+
+			benchmarks.sort((a, b) => a.cli.localeCompare(b.cli));
+
+			const serialized = serializeBenchmarks(benchmarks);
+			const updatedMainIndexContent = mainIndexContent.replace(benchmarksMatch[1], serialized);
+			fs.writeFileSync(mainIndexPath, updatedMainIndexContent, 'utf-8');
+		} catch (err) {
+			console.error('⚠️ Could not update BENCHMARKS array in src/index.html:', err.message);
+		}
+	}
+}
+
 console.log(`✅ Created benchmark at src/benchmarks/${benchmarkName}`);
 console.log(`  - src/benchmarks/${benchmarkName}/index.html`);
 console.log(`  - src/benchmarks/${benchmarkName}/tests.html`);
+console.log(`  - Updated src/index.html (BENCHMARKS array)`);
 console.log(`\nTo run this benchmark:`);
 console.log(`  npm run benchmark ${benchmarkName}`);

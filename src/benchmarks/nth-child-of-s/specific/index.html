@@ -51,6 +51,33 @@
 				margin: 0 auto;
 			}
 
+			.nav-back {
+				margin-bottom: 1.25rem;
+			}
+
+			.btn-back {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+				padding: 0.25rem 0.75rem;
+				border-radius: 9999px;
+				font-size: 0.8125rem;
+				font-weight: 500;
+				color: var(--accent);
+				background: transparent;
+				border: 1px solid var(--accent);
+				text-decoration: none;
+				transition:
+					background-color 0.15s ease,
+					color 0.15s ease,
+					border-color 0.15s ease;
+			}
+
+			.btn-back:hover {
+				background-color: var(--accent);
+				color: #ffffff;
+			}
+
 			header {
 				margin-bottom: 2rem;
 				border-bottom: 1px solid var(--border);
@@ -625,6 +652,9 @@
 
 	<body>
 		<div class="container">
+			<nav class="nav-back">
+				<a href="/" class="btn-back">&larr; Back to index</a>
+			</nav>
 			<header>
 				<h1>:nth-child() of S Specificity Benchmark</h1>
 				<p class="lead">Measuring the impact of qualifying and scoping :nth-last-child(n of S) selectors with element tags and container IDs.</p>

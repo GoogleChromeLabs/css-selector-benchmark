@@ -1,12 +1,708 @@
+<!doctype html>
 <!--
  Copyright 2024 Google LLC
  SPDX-License-Identifier: Apache-2.0
 -->
 
-<h1>CSS Selector Benchmark</h1>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CSS Selector Benchmark Suite</title>
+		<style>
+			:root {
+				--bg: #f8fafc;
+				--surface: #ffffff;
+				--surface-subtle: #f1f5f9;
+				--border: #e2e8f0;
+				--border-dark: #cbd5e1;
+				--text: #0f172a;
+				--text-muted: #64748b;
+				--accent: #2563eb;
+				--accent-hover: #1d4ed8;
+				--code-bg: #f1f5f9;
+			}
 
-<p>Webserver is started and is running on <code>http://localhost:3000/</code>.</p>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
 
-<p>Now go run a test:</p>
+			body {
+				font-family:
+					system-ui,
+					-apple-system,
+					BlinkMacSystemFont,
+					'Segoe UI',
+					Roboto,
+					Helvetica,
+					Arial,
+					sans-serif;
+				background-color: var(--bg);
+				color: var(--text);
+				padding: 2.5rem 1.5rem;
+				line-height: 1.5;
+			}
 
-<pre><code>npm run benchmark 1</code></pre>
+			.container {
+				max-width: 1080px;
+				margin: 0 auto;
+			}
+
+			header {
+				margin-bottom: 2rem;
+				border-bottom: 1px solid var(--border);
+				padding-bottom: 1.75rem;
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 1.5rem;
+			}
+
+			.header-content {
+				flex: 1;
+			}
+
+			.github-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.45rem;
+				padding: 0.35rem 0.85rem;
+				border-radius: 9999px;
+				font-size: 0.8125rem;
+				font-weight: 500;
+				color: var(--text);
+				background: var(--surface);
+				border: 1px solid var(--border-dark);
+				text-decoration: none;
+				transition:
+					border-color 0.15s ease,
+					color 0.15s ease,
+					box-shadow 0.15s ease;
+				flex-shrink: 0;
+			}
+
+			.github-badge:hover {
+				border-color: var(--accent);
+				color: var(--accent);
+				box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+			}
+
+			.github-badge svg {
+				width: 16px;
+				height: 16px;
+				fill: currentColor;
+			}
+
+			h1 {
+				font-size: 2rem;
+				font-weight: 700;
+				color: var(--text);
+				margin-bottom: 0.5rem;
+				letter-spacing: -0.025em;
+			}
+
+			p.lead {
+				font-size: 1.0625rem;
+				color: var(--text-muted);
+				line-height: 1.6;
+			}
+
+			.info-banner {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: 8px;
+				padding: 1.25rem 1.5rem;
+				margin-bottom: 2rem;
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: space-between;
+				gap: 1.25rem;
+			}
+
+			.server-info {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+
+			.status-dot {
+				width: 10px;
+				height: 10px;
+				border-radius: 50%;
+				background: #22c55e;
+				box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+				flex-shrink: 0;
+			}
+
+			.server-details strong {
+				display: block;
+				font-size: 0.875rem;
+				font-weight: 600;
+				color: var(--text);
+			}
+
+			.server-details span {
+				font-size: 0.8125rem;
+				color: var(--text-muted);
+			}
+
+			.cli-tip {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 0.8125rem;
+				color: var(--text-muted);
+			}
+
+			.cli-tip code {
+				font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+				background: var(--surface-subtle);
+				padding: 0.25rem 0.55rem;
+				border-radius: 4px;
+				border: 1px solid var(--border);
+				color: var(--text);
+			}
+
+			.controls-bar {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: space-between;
+				gap: 1rem;
+				margin-bottom: 1.5rem;
+			}
+
+			.category-filter {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+			}
+
+			.filter-btn {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				padding: 0.35rem 0.85rem;
+				border-radius: 9999px;
+				font-size: 0.8125rem;
+				font-weight: 500;
+				color: var(--text-muted);
+				cursor: pointer;
+				transition: all 0.15s ease;
+			}
+
+			.filter-btn:hover {
+				border-color: var(--border-dark);
+				color: var(--text);
+			}
+
+			.filter-btn.active {
+				background: var(--accent);
+				border-color: var(--accent);
+				color: #ffffff;
+			}
+
+			.search-box {
+				position: relative;
+			}
+
+			.search-input {
+				padding: 0.45rem 0.85rem;
+				border-radius: 6px;
+				border: 1px solid var(--border-dark);
+				font-size: 0.875rem;
+				background: var(--surface);
+				color: var(--text);
+				width: 260px;
+				outline: none;
+				transition: border-color 0.15s ease;
+			}
+
+			.search-input:focus {
+				border-color: var(--accent);
+			}
+
+			.benchmarks-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+				gap: 1.25rem;
+				margin-bottom: 2.5rem;
+			}
+
+			.benchmark-card {
+				background: var(--surface);
+				border: 1px solid var(--border);
+				border-radius: 8px;
+				padding: 1.35rem;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				text-decoration: none;
+				color: inherit;
+				transition:
+					border-color 0.15s ease,
+					box-shadow 0.15s ease,
+					transform 0.15s ease;
+			}
+
+			.benchmark-card:hover {
+				border-color: var(--accent);
+				box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+				transform: translateY(-2px);
+			}
+
+			.card-header {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 0.75rem;
+				margin-bottom: 0.6rem;
+			}
+
+			.card-title {
+				font-size: 1.0625rem;
+				font-weight: 600;
+				color: var(--text);
+				line-height: 1.35;
+			}
+
+			.benchmark-card:hover .card-title {
+				color: var(--accent);
+			}
+
+			.card-category {
+				font-size: 0.6875rem;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				padding: 0.15rem 0.5rem;
+				border-radius: 4px;
+				background: var(--surface-subtle);
+				border: 1px solid var(--border);
+				color: var(--text-muted);
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+
+			.card-desc {
+				font-size: 0.875rem;
+				color: var(--text-muted);
+				line-height: 1.5;
+				margin-bottom: 1rem;
+				flex-grow: 1;
+			}
+
+			.card-footer {
+				display: flex;
+				flex-direction: column;
+				gap: 0.65rem;
+				border-top: 1px solid var(--surface-subtle);
+				padding-top: 0.85rem;
+			}
+
+			.card-tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.35rem;
+			}
+
+			.card-tag {
+				font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+				font-size: 0.6875rem;
+				background: var(--code-bg);
+				padding: 0.12rem 0.4rem;
+				border-radius: 4px;
+				border: 1px solid var(--border);
+				color: var(--text);
+			}
+
+			.card-cli {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+				font-size: 0.75rem;
+				background: var(--surface-subtle);
+				padding: 0.3rem 0.6rem;
+				border-radius: 4px;
+				border: 1px solid var(--border);
+				color: var(--text-muted);
+			}
+
+			.card-action {
+				font-size: 0.8125rem;
+				font-weight: 500;
+				color: var(--accent);
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+				margin-top: 0.25rem;
+			}
+
+			.empty-state {
+				grid-column: 1 / -1;
+				text-align: center;
+				padding: 3rem 1.5rem;
+				color: var(--text-muted);
+				background: var(--surface);
+				border: 1px dashed var(--border);
+				border-radius: 8px;
+			}
+
+			footer {
+				border-top: 1px solid var(--border);
+				padding-top: 1.5rem;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+				align-items: center;
+				gap: 1rem;
+				font-size: 0.8125rem;
+				color: var(--text-muted);
+			}
+
+			footer a {
+				color: var(--accent);
+				text-decoration: none;
+			}
+
+			footer a:hover {
+				text-decoration: underline;
+			}
+		</style>
+
+		<script type="module">
+			const BENCHMARKS = [
+				{
+					path: 'benchmarks/at-property/',
+					cli: 'at-property',
+					title: 'CSS @property',
+					category: 'At-Rules',
+					desc: 'Measures style recalculation performance of registered custom properties via @property versus standard custom properties.',
+					tags: ['@property', 'registered properties', 'recalc'],
+				},
+				{
+					path: 'benchmarks/at-rule/',
+					cli: 'at-rule',
+					title: 'CSS At-Rules: Nesting, @scope, @container',
+					category: 'At-Rules',
+					desc: 'Compares recalculation overhead between CSS Nesting, @scope rules, and @container queries across repeated structures.',
+					tags: ['@scope', '@container', 'nesting'],
+				},
+				{
+					path: 'benchmarks/btn/',
+					cli: 'btn',
+					title: 'Button Class vs Attribute Selectors',
+					category: 'Class & Attribute',
+					desc: 'Benchmarks .btn against attribute selectors [class^="btn-"] and [class*=" btn-"] across 1 to 100 classes.',
+					tags: ['.btn', '[class^="..."]', '[class*="..."]'],
+				},
+				{
+					path: 'benchmarks/cssom/unitvalue/',
+					cli: 'cssom/unitvalue',
+					title: 'CSS Typed OM: CSSUnitValue',
+					category: 'CSSOM',
+					desc: 'Compares setting styles via CSS Typed OM (attributeStyleMap.set) using CSSUnitValue vs traditional element.style strings.',
+					tags: ['CSS Typed OM', 'CSSUnitValue', 'attributeStyleMap'],
+				},
+				{
+					path: 'benchmarks/example/',
+					cli: 'example',
+					title: 'Example Baseline Benchmark',
+					category: 'Reference',
+					desc: 'A minimal reference benchmark demonstrating the test harness and baseline querySelectorAll performance.',
+					tags: ['baseline', 'reference', 'querySelectorAll'],
+				},
+				{
+					path: 'benchmarks/has/general/',
+					cli: 'has/general',
+					title: ':has() Global vs Scoped',
+					category: ':has()',
+					desc: 'Measures style recalculation for globally scoped :root:has(...) versus scoped nav:has(...) and direct child nav:has(> ...).',
+					tags: [':has()', 'scoping', 'navigation'],
+				},
+				{
+					path: 'benchmarks/has/sibling-invalidation/',
+					cli: 'has/sibling-invalidation',
+					title: ':has() Sibling Invalidation',
+					category: ':has()',
+					desc: 'Evaluates style invalidation performance for :has() rules targeting siblings during DOM attribute changes.',
+					tags: [':has()', 'siblings', 'invalidation'],
+				},
+				{
+					path: 'benchmarks/has/sibling-scope/',
+					cli: 'has/sibling-scope',
+					title: ':has() Sibling Scope',
+					category: ':has()',
+					desc: 'Benchmarks style invalidation with subsequent-sibling combinators (~ and +) placed within :has() conditions.',
+					tags: [':has()', 'sibling chains', '~ combinator'],
+				},
+				{
+					path: 'benchmarks/is/',
+					cli: 'is',
+					title: ':is() and :where() Matching',
+					category: 'Pseudo-classes',
+					desc: 'Compares matching speed between :is()/:where() pseudo-class selector lists and expanded individual selectors.',
+					tags: [':is()', ':where()', 'selector lists'],
+				},
+				{
+					path: 'benchmarks/nesting/',
+					cli: 'nesting',
+					title: 'CSS Nesting',
+					category: 'Nesting',
+					desc: 'Measures style resolution speed of native CSS nesting (&) against flat unscoped rules and nested :is() structures.',
+					tags: ['nesting', '& selector', 'CSS Nesting'],
+				},
+				{
+					path: 'benchmarks/nth-child-of-s/faked/',
+					cli: 'nth-child-of-s/faked',
+					title: ':nth-child() of S (Faked via Siblings)',
+					category: ':nth-child()',
+					desc: 'Emulates :nth-child(n of S) behavior using preceding sibling selector chains (~ combinator) as a performance baseline.',
+					tags: [':nth-child()', 'sibling chains', 'emulated'],
+				},
+				{
+					path: 'benchmarks/nth-child-of-s/has-nohas/',
+					cli: 'nth-child-of-s/has-nohas',
+					title: ':nth-child() of S with and without :has()',
+					category: ':nth-child()',
+					desc: 'Evaluates selector matching efficiency when combining modern :nth-child(n of S) with :has() vs without.',
+					tags: [':nth-child()', ':has()', 'filters'],
+				},
+				{
+					path: 'benchmarks/nth-child-of-s/nth-child/',
+					cli: 'nth-child-of-s/nth-child',
+					title: ':nth-child() of S Selector Filter',
+					category: ':nth-child()',
+					desc: 'Direct performance benchmarks of the native :nth-child(An+B of selector) syntax, tested with and without @supports.',
+					tags: [':nth-child(n of S)', '@supports', 'filters'],
+				},
+				{
+					path: 'benchmarks/nth-child-of-s/specific/',
+					cli: 'nth-child-of-s/specific',
+					title: ':nth-child() of S Specificity',
+					category: ':nth-child()',
+					desc: 'Measures recalculation overhead across varying specificity selectors passed into the :nth-child(n of S) argument.',
+					tags: [':nth-child()', 'specificity', 'complex selectors'],
+				},
+				{
+					path: 'benchmarks/scope/',
+					cli: 'scope',
+					title: 'CSS @scope Benchmark',
+					category: '@scope',
+					desc: 'Measures style recalculation performance of @scope rules (shared, duplicated, and preludeless) versus global unscoped selectors.',
+					tags: ['@scope', 'scoping roots', 'preludeless'],
+				},
+				{
+					path: 'benchmarks/selectors/combinators/',
+					cli: 'selectors/combinators',
+					title: 'Selectors & Combinators Suite',
+					category: 'Combinators',
+					desc: 'Comprehensive suite of 22 selectors: IDs, tags, classes, attributes, child, descendant, and pseudo-selectors.',
+					tags: ['combinators', 'attributes', 'IDs', 'classes'],
+				},
+				{
+					path: 'benchmarks/selectors/length/',
+					cli: 'selectors/length',
+					title: 'Classname Length Performance',
+					category: 'Class & Attribute',
+					desc: 'Tests whether the string length of CSS classnames (from short 5 chars to long 100 chars) affects selector matching speed.',
+					tags: ['classname length', 'string hashing'],
+				},
+				{
+					path: 'benchmarks/tw-example/',
+					cli: 'tw-example',
+					title: 'Tailwind CSS Selectors',
+					category: 'Frameworks',
+					desc: 'Benchmarks real-world Tailwind CSS utility classes and escaped character selectors against conventional stylesheet selectors.',
+					tags: ['tailwind', 'utility classes', 'escaped selectors'],
+				},
+			];
+
+			window.BENCHMARKS = BENCHMARKS;
+
+			let activeCategory = 'All';
+			let searchQuery = '';
+
+			function getCategories() {
+				const set = new Set();
+				BENCHMARKS.forEach((b) => set.add(b.category));
+				return ['All', ...Array.from(set).sort()];
+			}
+
+			function renderFilters() {
+				const filterContainer = document.getElementById('category-filter');
+				if (!filterContainer) return;
+
+				const categories = getCategories();
+				filterContainer.innerHTML = '';
+
+				categories.forEach((cat) => {
+					const btn = document.createElement('button');
+					btn.type = 'button';
+					btn.className = `filter-btn ${cat === activeCategory ? 'active' : ''}`;
+					btn.textContent = cat;
+					btn.addEventListener('click', () => {
+						activeCategory = cat;
+						renderFilters();
+						renderGrid();
+					});
+					filterContainer.appendChild(btn);
+				});
+			}
+
+			function renderGrid() {
+				const grid = document.getElementById('benchmarks-grid');
+				const countEl = document.getElementById('benchmarks-count');
+				if (!grid) return;
+
+				const query = searchQuery.trim().toLowerCase();
+				const filtered = BENCHMARKS.filter((item) => {
+					const matchesCat = activeCategory === 'All' || item.category === activeCategory;
+					const matchesSearch =
+						!query ||
+						item.title.toLowerCase().includes(query) ||
+						item.desc.toLowerCase().includes(query) ||
+						item.cli.toLowerCase().includes(query) ||
+						item.tags.some((tag) => tag.toLowerCase().includes(query));
+					return matchesCat && matchesSearch;
+				});
+
+				if (countEl) {
+					countEl.textContent = `${filtered.length} of ${BENCHMARKS.length} benchmarks`;
+				}
+
+				if (filtered.length === 0) {
+					grid.innerHTML = `
+						<div class="empty-state">
+							<p>No benchmarks found matching "<strong>${searchQuery}</strong>".</p>
+						</div>
+					`;
+					return;
+				}
+
+				grid.innerHTML = '';
+				const dirPath = window.location.pathname.endsWith('.html')
+					? window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)
+					: window.location.pathname.endsWith('/')
+						? window.location.pathname
+						: window.location.pathname + '/';
+
+				filtered.forEach((item) => {
+					const card = document.createElement('a');
+					card.href = new URL(item.path, window.location.origin + dirPath).href;
+					card.className = 'benchmark-card';
+
+					const tagsHtml = item.tags.map((t) => `<span class="card-tag">${t}</span>`).join('');
+
+					card.innerHTML = `
+						<div>
+							<div class="card-header">
+								<h2 class="card-title">${item.title}</h2>
+								<span class="card-category">${item.category}</span>
+							</div>
+							<p class="card-desc">${item.desc}</p>
+						</div>
+						<div class="card-footer">
+							<div class="card-tags">
+								${tagsHtml}
+							</div>
+							<div class="card-cli">
+								<span class="cmd-text">npm run benchmark ${item.cli}</span>
+							</div>
+							<div class="card-action">
+								Run visual benchmark &rarr;
+							</div>
+						</div>
+					`;
+					grid.appendChild(card);
+				});
+			}
+
+			function updateServerUrl() {
+				const serverUrlEl = document.getElementById('server-url');
+				if (!serverUrlEl) return;
+
+				const url = new URL(window.location.href);
+				url.hash = '';
+				url.search = '';
+				let displayUrl = url.href.replace(/\/index\.html$/, '');
+				if (displayUrl === url.origin) {
+					displayUrl = url.origin + '/';
+				} else if (displayUrl.endsWith('/') && displayUrl !== url.origin + '/') {
+					displayUrl = displayUrl.slice(0, -1);
+				}
+				serverUrlEl.textContent = displayUrl;
+			}
+
+			function init() {
+				updateServerUrl();
+				renderFilters();
+				renderGrid();
+
+				const searchInput = document.getElementById('search-input');
+				if (searchInput) {
+					searchInput.addEventListener('input', (e) => {
+						searchQuery = e.target.value;
+						renderGrid();
+					});
+				}
+			}
+
+			if (document.readyState === 'loading') {
+				window.addEventListener('DOMContentLoaded', init);
+			} else {
+				init();
+			}
+		</script>
+	</head>
+
+	<body>
+		<div class="container">
+			<header>
+				<div class="header-content">
+					<h1>CSS Selector Benchmark</h1>
+					<p class="lead">CSS Selector Benchmarks, using PerfTestRunner and Puppeteer</p>
+				</div>
+				<a href="https://github.com/GoogleChromeLabs/css-selector-benchmark" class="github-badge" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">
+					<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">
+						<path
+							d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+						></path>
+					</svg>
+					<span>GitHub</span>
+				</a>
+			</header>
+
+			<div class="info-banner">
+				<div class="server-info">
+					<div class="status-dot"></div>
+					<div class="server-details">
+						<strong>Local Test Server Running</strong>
+						<span><code id="server-url">http://localhost:3000/</code></span>
+					</div>
+				</div>
+				<div class="cli-tip">
+					<span>Run any test from CLI:</span>
+					<code>npm run benchmark &lt;name&gt;</code>
+				</div>
+			</div>
+
+			<div class="controls-bar">
+				<div class="category-filter" id="category-filter"></div>
+				<div class="search-box">
+					<input type="search" id="search-input" class="search-input" placeholder="Search benchmarks..." aria-label="Search benchmarks" />
+				</div>
+			</div>
+
+			<div class="benchmarks-grid" id="benchmarks-grid"></div>
+
+			<footer>
+				<span id="benchmarks-count">Loading benchmarks…</span>
+				<span>Create new benchmark: <code>npm run create &lt;name&gt;</code></span>
+			</footer>
+		</div>
+	</body>
+</html>
