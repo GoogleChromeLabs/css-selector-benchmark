@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>CSS @property Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'at-property/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: '@property',
+					desc: 'Registered vs unregistered CSS custom properties',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,16 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>CSS @property Benchmark</h1>
+				<p class="lead">
+					Measuring the style invalidation and recalculation performance of registered custom properties (@property) versus unregistered custom properties and standard CSS properties.
+				</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">@property</span>
+					<span class="chip">inherits: true</span>
+					<span class="chip">inherits: false</span>
+					<span class="chip">unregistered custom properties</span>
+					<span class="chip">standard properties</span>
 				</div>
 			</header>
 
@@ -668,8 +673,18 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Compares regular CSS properties (inheriting and non-inheriting) against unregistered custom properties and custom properties registered via <code>@property</code> (with and
+						without inheritance).
+					</p>
+				</div>
+				<div class="info-card">
+					<h3>Key Performance Factors</h3>
+					<ul>
+						<li><strong>Inheritance:</strong> Properties that inherit require traversing down the DOM tree during style recalculation.</li>
+						<li><strong>Registration:</strong> <code>@property</code> allows browsers to validate syntax and skip subtree propagation when <code>inherits: false</code>.</li>
+					</ul>
 				</div>
 			</div>
 		</div>

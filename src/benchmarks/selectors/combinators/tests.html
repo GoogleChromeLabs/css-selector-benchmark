@@ -8,8 +8,8 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="source" content="https://front-end.social/@bramus/111794101191771782" />
-		<title>:is()</title>
+		<title>Test</title>
+		<meta name="source" content="https://github.com/benfrain/css-performance-tests/blob/master/CSS%20Selectors/" />
 		<script type="module">
 			import PerfTestRunner from '/lib/PerfTestRunner.js';
 			import { createElement } from '/lib/DOM.js';
@@ -46,11 +46,28 @@
 			}
 
 			const selectors = {
-				ul: 'ul',
-				':is(ul)': ':is(ul)',
-				':is(ul, .inexistent)': ':is(ul, .inexistent)',
-				':where(ul)': ':where(ul)',
-				':where(ul, .inexistent)': ':where(ul, .inexistent)',
+				'0. Element by id': '#container',
+				'0. Elements by tag name': 'div',
+				'1. Data Attribute (unqualified)': '[data-select]',
+				'2. Data Attribute (qualified)': 'a[data-select]',
+				'3. Data Attribute (unqualified with value)': '[data-select="link"]',
+				'4. Data Attribute (qualified with value)': 'a[data-select="link"]',
+				'5. Multiple Data Attributes (qualified with values)': 'div[data-div="layer1"] a[data-select="link"]',
+				'6. Solo Pseudo selector': 'a:after',
+				'7. Combined classes': '.tagA.link',
+				'8. Multiple classes': '.tagUl .link',
+				'9. Multiple classes (using child selector)': '.tagB > .tagA',
+				'10. Partial attribute matching': '[class^="wrap"]',
+				'11. Nth-child selector': '.div:nth-of-type(1) a',
+				'12. Nth-child selector followed by nth-child selector': '.div:nth-of-type(1) .div:nth-of-type(1) a',
+				'13. Insanity selection (unlucky for some)': 'div.wrapper > div.tagDiv > div.tagDiv.layer2 > ul.tagUL > li.tagLi > b.tagB > a.TagA.link',
+				'14. Slight insanity': '.tagLi .tagB a.TagA.link',
+				'15. Universal': '*',
+				'16. Element single': 'a',
+				'17. Element double': 'div a',
+				'18. Element treble': 'div ul a',
+				'19. Element treble pseudo': 'div ul a:after',
+				'20. Single class': '.link',
 			};
 
 			const runTest = (description, selector) =>
@@ -58,17 +75,14 @@
 					PerfTestRunner.measureRunsPerSecond({
 						description: `Selector Test ${description}`,
 						setup: () => {
-							setCSS(`#container.active ${selector} { outline: 1px solid red; }`);
+							setCSS(`${selector} { color: red; }`);
 						},
 						run: function () {
-							$container.classList.toggle('active');
-							getComputedStyle($container).getPropertyValue('--trigger'); // Trigger style invalidation
+							$container.offsetHeight; // force recalc style
 						},
-						iterationCount: 2,
-						tearDown: resetCSS,
-						done: (results) => {
-							resolve(results);
-						},
+						iterationCount: 5,
+						teardown: resetCSS,
+						done: resolve,
 					});
 				});
 
@@ -76,8 +90,8 @@
 
 			window.getTests = () =>
 				Object.entries(selectors).map(([description, selector]) => ({
-					scenario: 'Element Selectors',
-					description: 'Element: ' + description,
+					scenario: 'Combinators',
+					description,
 					selector,
 				}));
 

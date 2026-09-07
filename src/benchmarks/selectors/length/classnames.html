@@ -8,8 +8,8 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="source" content="https://front-end.social/@bramus/111794101191771782" />
-		<title>:is()</title>
+		<title>Test</title>
+		<meta name="source" content="https://github.com/benfrain/css-performance-tests/blob/master/CSS%20Selectors/" />
 		<script type="module">
 			import PerfTestRunner from '/lib/PerfTestRunner.js';
 			import { createElement } from '/lib/DOM.js';
@@ -20,14 +20,10 @@
 				for (var i = 0; i <= numSiblings; i++) {
 					$container.appendChild(
 						createElement('div', {
-							className: `tagDiv wrap${i}`,
-							innerHTML: `<div class="tagDiv layer1" data-div="layer1">
-										<div class="tagDiv layer2">
-											<ul class="tagUl">
-												<li class="tagLi"><b class="tagB"><a href="/" class="tagA link" data-select="link">Select</a></b></li>
-											</ul>
-										</div>
-									</div>`,
+							innerHTML: `<div>
+							<div class="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"></div>
+							<div class="a"></div>
+						</div>`,
 						}),
 					);
 				}
@@ -46,11 +42,9 @@
 			}
 
 			const selectors = {
-				ul: 'ul',
-				':is(ul)': ':is(ul)',
-				':is(ul, .inexistent)': ':is(ul, .inexistent)',
-				':where(ul)': ':where(ul)',
-				':where(ul, .inexistent)': ':where(ul, .inexistent)',
+				'1. Long classname':
+					'.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+				'2. Short classname': '.a',
 			};
 
 			const runTest = (description, selector) =>
@@ -58,17 +52,14 @@
 					PerfTestRunner.measureRunsPerSecond({
 						description: `Selector Test ${description}`,
 						setup: () => {
-							setCSS(`#container.active ${selector} { outline: 1px solid red; }`);
+							setCSS(`${selector} { color: red; }`);
 						},
 						run: function () {
-							$container.classList.toggle('active');
-							getComputedStyle($container).getPropertyValue('--trigger'); // Trigger style invalidation
+							getComputedStyle($container); // force recalc style
 						},
-						iterationCount: 2,
-						tearDown: resetCSS,
-						done: (results) => {
-							resolve(results);
-						},
+						iterationCount: 5,
+						teardown: resetCSS,
+						done: resolve,
 					});
 				});
 
@@ -76,8 +67,8 @@
 
 			window.getTests = () =>
 				Object.entries(selectors).map(([description, selector]) => ({
-					scenario: 'Element Selectors',
-					description: 'Element: ' + description,
+					scenario: 'Class Length',
+					description,
 					selector,
 				}));
 

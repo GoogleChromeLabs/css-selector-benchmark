@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>:nth-child() of S with and without :has()</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'nth-child-of-s/has-nohas/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: 'Has vs No-Has',
+					desc: ':nth-child(n of S) combined with :has() boundaries',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,13 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>:nth-child() of S with and without :has()</h1>
+				<p class="lead">Measuring the interaction between :nth-last-child(3 of .special) and :has() parent/ancestor scopes.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">No has</span>
+					<span class="chip">With :has()</span>
+					<span class="chip">With :has() but #container inside</span>
+					<span class="chip">Direct child combinators</span>
 				</div>
 			</header>
 
@@ -668,8 +670,8 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>Compares matching speeds when <code>:nth-last-child(n of S)</code> is used with or without parent <code>:has()</code> wrappers and child combinators.</p>
 				</div>
 			</div>
 		</div>

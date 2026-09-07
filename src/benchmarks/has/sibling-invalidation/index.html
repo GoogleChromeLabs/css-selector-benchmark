@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>:has() Sibling Invalidation Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'has/sibling-invalidation/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: 'Sibling Invalidation',
+					desc: 'Invalidation performance across 2048 siblings',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,12 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>:has() Sibling Invalidation Benchmark</h1>
+				<p class="lead">Ported from Blink performance test measuring style recalculation cost of .a:has(~ .b) invalidation across 2,048 sibling elements.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">.a:has(~ .b)</span>
+					<span class="chip">2048 sibling elements</span>
+					<span class="chip">Blink perf suite</span>
 				</div>
 			</header>
 
@@ -668,8 +669,8 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>Toggling a class on sibling elements in a 2,048 sibling tree and measuring the overhead of the browser checking subsequent siblings for <code>:has(~ .b)</code> invalidation.</p>
 				</div>
 			</div>
 		</div>

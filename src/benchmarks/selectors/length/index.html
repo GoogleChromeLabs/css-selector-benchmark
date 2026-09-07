@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>CSS Classname Length Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
-					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					file: 'selectors/length/classnames.html',
+					title: 'classnames.html',
+					label: 'Class Length',
+					desc: 'Long class names vs short class names',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,12 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>CSS Classname Length Benchmark</h1>
+				<p class="lead">Evaluating style recalculation performance between very long class names (250+ characters) and short single-letter class names.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">Long classname (250+ chars)</span>
+					<span class="chip">Short classname (.a)</span>
+					<span class="chip">Class string hash lookup</span>
 				</div>
 			</header>
 
@@ -668,8 +669,8 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>Tests if the string length of class names has a measurable impact on atomic class hashing and selector matching in the browser.</p>
 				</div>
 			</div>
 		</div>

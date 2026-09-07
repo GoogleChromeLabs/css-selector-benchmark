@@ -1,0 +1,100 @@
+<!doctype html>
+<!--
+ Copyright 2024 Google LLC
+ SPDX-License-Identifier: Apache-2.0
+-->
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Test</title>
+		<script type="module">
+			import PerfTestRunner from '/lib/PerfTestRunner.js';
+
+			/**
+			 * CSSUnitValue manual concat
+			 */
+			const testManual = (description) =>
+				new Promise((resolve, reject) => {
+					PerfTestRunner.measureRunsPerSecond({
+						description,
+						run: function () {
+							const px = new CSSUnitValue(100, 'px');
+							const str = px.value + px.unit;
+						},
+						iterationCount: 5,
+						done: resolve,
+					});
+				});
+
+			/**
+			 * CSSUnitValue.toString()
+			 */
+			const testToString = (description) =>
+				new Promise((resolve, reject) => {
+					PerfTestRunner.measureRunsPerSecond({
+						description,
+						run: function () {
+							const px = new CSSUnitValue(100, 'px');
+							const str = px.toString();
+						},
+						iterationCount: 5,
+						done: resolve,
+					});
+				});
+
+			const tests = {
+				'CSSUnitValue manual concat': testManual,
+				'CSSUnitValue.toString()': testToString,
+			};
+
+			const average = (array) => (Array.isArray(array) ? array.reduce((a, b) => a + b, 0) / array.length : array);
+
+			window.getTests = () =>
+				Object.keys(tests).map((description) => ({
+					scenario: 'CSSOM',
+					description,
+					selector: description,
+				}));
+
+			window.startTest = (onResult, onStart) =>
+				new Promise(async (resolve) => {
+					const allResults = [];
+
+					for (const test of window.getTests()) {
+						if (typeof onStart === 'function') {
+							onStart(test);
+						}
+						const testFn = tests[test.description];
+						const testResult = await testFn(test.description);
+						const avg = average(testResult);
+						const item = {
+							scenario: test.scenario,
+							description: test.description,
+							selector: test.selector,
+							result: Math.round(avg * 100) / 100,
+						};
+						allResults.push(item);
+						if (typeof onResult === 'function') {
+							onResult(item);
+						}
+					}
+
+					const max = Math.max(...allResults.map((r) => r.result), 1);
+					resolve(
+						allResults
+							.map((r) => {
+								r.perc = ((r.result / max) * 100).toFixed(2) + '%';
+								return r;
+							})
+							.sort((r1, r2) => r2.result - r1.result),
+					);
+				});
+		</script>
+	</head>
+
+	<body>
+		<div id="container"></div>
+	</body>
+</html>

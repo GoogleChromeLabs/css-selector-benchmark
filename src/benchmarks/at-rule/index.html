@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>CSS At-Rules Benchmark: Nesting, @scope, and @container</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'at-rule/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: '@rule',
+					desc: 'At-rules and nesting performance comparison',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,15 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>CSS At-Rules Benchmark: Nesting, @scope, and @container</h1>
+				<p class="lead">Evaluating selector matching and style recalculation overhead when wrapping rules in CSS Nesting, @scope, container size queries, and container style queries.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">none</span>
+					<span class="chip">nesting</span>
+					<span class="chip">@scope</span>
+					<span class="chip">@container size</span>
+					<span class="chip">@container style (unregistered)</span>
+					<span class="chip">@container style (registered)</span>
 				</div>
 			</header>
 
@@ -668,8 +672,15 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>Compares basic descendant selectors against selectors wrapped inside <code>nesting</code>, <code>@scope</code>, and <code>@container</code> (size and style queries).</p>
+				</div>
+				<div class="info-card">
+					<h3>Key Performance Factors</h3>
+					<ul>
+						<li><strong>Scope & Nesting:</strong> At-rules alter selector matching branches and evaluation boundaries in the CSS engine.</li>
+						<li><strong>Container Queries:</strong> Evaluating container queries adds container-resolution steps before matching child rules.</li>
+					</ul>
 				</div>
 			</div>
 		</div>

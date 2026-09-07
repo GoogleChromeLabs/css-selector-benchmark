@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>:nth-child() of S Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,16 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'nth-child/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: 'Native nth-child',
+					desc: 'Native :nth-child(n of S) matching performance',
+				},
+				{
+					file: 'nth-child/tests-with-at-supports.html',
+					title: 'tests-with-at-supports.html',
+					label: '@supports Nested',
+					desc: 'Deeply nested @supports wrapping :nth-child(n of S)',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +632,13 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>:nth-child() of S Benchmark</h1>
+				<p class="lead">Evaluating native browser implementation of :nth-child(3 of .special) and :nth-last-child(7 of .special), with and without nested @supports conditional rules.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">:nth-child(3 of .special)</span>
+					<span class="chip">:nth-last-child(7 of .special)</span>
+					<span class="chip">native implementation</span>
+					<span class="chip">20 nested @supports blocks</span>
 				</div>
 			</header>
 
@@ -668,8 +676,15 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Benchmarks the native engine implementation of the <code>of S</code> syntax in <code>:nth-child()</code> and <code>:nth-last-child()</code> during class toggle invalidations,
+						both standalone and nested within 20 levels of <code>@supports</code> conditional rules.
+					</p>
+				</div>
+				<div class="info-card">
+					<h3>Key Performance Factors</h3>
+					<p>Tests whether deeply nested conditional rules (like <code>@supports</code>) add any runtime lookup overhead to selector matching after initial stylesheet evaluation.</p>
 				</div>
 			</div>
 		</div>

@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>CSS Selectors &amp; Combinators Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'selectors/combinators/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: 'Combinators',
+					desc: '22 selector and combinator patterns',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,17 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>CSS Selectors &amp; Combinators Benchmark</h1>
+				<p class="lead">Comprehensive benchmark measuring style matching performance across 22 distinct selector types, combinators, and specificity depths.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">#id</span>
+					<span class="chip">.class</span>
+					<span class="chip">[data-attr]</span>
+					<span class="chip">div a</span>
+					<span class="chip">div &gt; a</span>
+					<span class="chip">a:after</span>
+					<span class="chip">:nth-of-type()</span>
+					<span class="chip">Insanity selector</span>
 				</div>
 			</header>
 
@@ -668,8 +674,11 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Based on Ben Frain’s classic CSS selector performance suite, testing ID, tag, unqualified/qualified attribute selectors, multiple combinators, nth-of-type, and deep selector
+						chains across 1,000 DOM subtrees.
+					</p>
 				</div>
 			</div>
 		</div>

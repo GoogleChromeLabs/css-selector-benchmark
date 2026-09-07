@@ -10,11 +10,19 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Test</title>
 		<style>
-			#container {
-				.special {
-					background: rgb(0 0 0 / 0.1);
-					border-left: 1px solid currentcolor;
-				}
+			.special {
+				background: rgb(0 0 0 / 0.1);
+				border-left: 1px solid currentcolor;
+			}
+
+			:nth-child(3 of .special) {
+				border-left-width: 10px;
+				color: red;
+			}
+
+			:nth-last-child(7 of .special) {
+				border-left-width: 10px;
+				color: red;
 			}
 		</style>
 		<script type="module">
@@ -27,9 +35,9 @@
 
 			window.getTests = () => [
 				{
-					scenario: 'Nesting',
-					description: 'With Nesting',
-					selector: '#container { .special }',
+					scenario: 'Native',
+					description: 'Native :nth-child(3 of .special) and :nth-last-child(7 of .special)',
+					selector: ':nth-child(3 of .special)',
 				},
 			];
 
@@ -44,9 +52,9 @@
 							PerfTestRunner.measureRunsPerSecond({
 								description: test.description,
 								run: function () {
-									$container.id = 'not-container';
+									$veryspecial.classList.toggle('special');
 									$container.offsetHeight;
-									$container.id = 'container';
+									$veryspecial.classList.toggle('special');
 									$container.offsetHeight;
 								},
 								done: resDone,

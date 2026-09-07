@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>:is() and :where() Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,22 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
-					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					file: 'is/class.html',
+					title: 'class.html',
+					label: 'Class Selectors',
+					desc: 'Class matching with :is() and :where()',
+				},
+				{
+					file: 'is/element.html',
+					title: 'element.html',
+					label: 'Element Selectors',
+					desc: 'Element matching with :is() and :where()',
+				},
+				{
+					file: 'is/misc.html',
+					title: 'misc.html',
+					label: 'Compound Selectors',
+					desc: 'Nested and compound :is() and :where() rules',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +638,14 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>:is() and :where() Benchmark</h1>
+				<p class="lead">Measuring performance impact of wrapping class, element, and compound selectors in :is() and :where() pseudo-classes, including non-matching branches.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">.tagDiv</span>
+					<span class="chip">:is(.tagDiv)</span>
+					<span class="chip">:where(.tagDiv)</span>
+					<span class="chip">:is(ul)</span>
+					<span class="chip">compound :is()</span>
 				</div>
 			</header>
 
@@ -668,8 +683,11 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Tests whether wrapping selectors inside <code>:is()</code> or <code>:where()</code> introduces matching overhead compared to bare class and element selectors, and evaluates how
+						invalid/inexistent selector arguments affect evaluation.
+					</p>
 				</div>
 			</div>
 		</div>

@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>CSS Nesting Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,22 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
-					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					file: 'nesting/with.html',
+					title: 'with.html',
+					label: 'With Nesting',
+					desc: 'CSS rules using native nesting syntax',
+				},
+				{
+					file: 'nesting/without.html',
+					title: 'without.html',
+					label: 'Without Nesting',
+					desc: 'Standard descendant selector syntax',
+				},
+				{
+					file: 'nesting/without-is.html',
+					title: 'without-is.html',
+					label: 'Without Nesting (:is)',
+					desc: 'Desugared selector using :is()',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +638,12 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>CSS Nesting Benchmark</h1>
+				<p class="lead">Measuring performance of native CSS Nesting (#container { .special }) compared to unscoped descendant selectors (#container .special) and :is() desugared selectors.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">#container { .special }</span>
+					<span class="chip">#container .special</span>
+					<span class="chip">:is(#container) .special</span>
 				</div>
 			</header>
 
@@ -668,8 +681,10 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Evaluates whether native CSS Nesting parsing and internal representation has any runtime performance cost compared to manually written flattened rules or :is()-wrapped rules.
+					</p>
 				</div>
 			</div>
 		</div>

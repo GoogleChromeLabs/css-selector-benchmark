@@ -1,0 +1,96 @@
+<!doctype html>
+<!--
+ Copyright 2024 Google LLC
+ SPDX-License-Identifier: Apache-2.0
+-->
+
+<html>
+	<head>
+		<style>
+			div {
+				color: grey;
+			}
+
+			.a:has(~ .b) {
+				color: green;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="container">
+			<div class="a"></div>
+		</div>
+		<script type="module">
+			import PerfTestRunner from '/lib/PerfTestRunner.js';
+
+			function makeTree(siblings) {
+				for (var i = 0; i < siblings; i++) {
+					var child = document.createElement('div');
+					child.id = 'child' + i;
+					container.appendChild(child);
+				}
+			}
+
+			makeTree(2048);
+			container.offsetHeight; // force recalc style
+
+			var runFunction = function () {
+				child0.classList.toggle('b');
+				container.offsetHeight; // force recalc style
+				child0.classList.toggle('b');
+				container.offsetHeight; // force recalc style
+
+				child2047.classList.toggle('b');
+				container.offsetHeight; // force recalc style
+				child2047.classList.toggle('b');
+				container.offsetHeight; // force recalc style
+			};
+
+			const average = (array) => (Array.isArray(array) ? array.reduce((a, b) => a + b, 0) / array.length : array);
+
+			window.getTests = () => [
+				{
+					scenario: 'Sibling Invalidation',
+					description: "Measures performance of the '.a:has(~ .b)' invalidation with a single subject element.",
+					selector: '.a:has(~ .b)',
+				},
+			];
+
+			window.startTest = (onResult, onStart) =>
+				new Promise(async (resolve) => {
+					const allResults = [];
+					for (const test of window.getTests()) {
+						if (typeof onStart === 'function') {
+							onStart(test);
+						}
+						const res = await new Promise((resDone) => {
+							PerfTestRunner.measureRunsPerSecond({
+								description: test.description,
+								run: runFunction,
+								done: resDone,
+							});
+						});
+						const avg = average(res);
+						const item = {
+							scenario: test.scenario,
+							description: test.description,
+							selector: test.selector,
+							result: Math.round(avg * 100) / 100,
+						};
+						allResults.push(item);
+						if (typeof onResult === 'function') {
+							onResult(item);
+						}
+					}
+					const max = Math.max(...allResults.map((r) => r.result), 1);
+					resolve(
+						allResults.map((r) => {
+							r.perc = ((r.result / max) * 100).toFixed(2) + '%';
+							return r;
+						}),
+					);
+				});
+		</script>
+	</body>
+</html>

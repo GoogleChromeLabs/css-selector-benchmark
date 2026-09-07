@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>:nth-child() of S (Faked via Sibling Chains)</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'nth-child-of-s/faked/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: 'Faked of S',
+					desc: 'Emulating :nth-child(n of S) with sibling combinator chains',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,14 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>:nth-child() of S (Faked via Sibling Chains)</h1>
+				<p class="lead">
+					Simulating :nth-child(3 of .special) and :nth-last-child(7 of .special) using complex chains of general sibling combinators (~) and :not() before native support was available.
+				</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">.special ~ .special ~ .special</span>
+					<span class="chip">:not(:has(~ .special...))</span>
+					<span class="chip">fallback emulation</span>
 				</div>
 			</header>
 
@@ -668,8 +671,11 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Examines the severe performance degradation caused by emulating <code>:nth-child(n of S)</code> with combinator chains like
+						<code>.special ~ .special ~ .special:not(...)</code>.
+					</p>
 				</div>
 			</div>
 		</div>

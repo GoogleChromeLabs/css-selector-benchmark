@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>CSS Typed OM: CSSUnitValue Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'cssom/unitvalue/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: 'CSSUnitValue',
+					desc: 'CSSUnitValue stringification vs manual concatenation',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,12 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>CSS Typed OM: CSSUnitValue Benchmark</h1>
+				<p class="lead">Comparing performance between CSS Typed OM CSSUnitValue serialization (toString()) and manual string concatenation.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">CSSUnitValue</span>
+					<span class="chip">toString()</span>
+					<span class="chip">Manual concat</span>
 				</div>
 			</header>
 
@@ -668,8 +669,11 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Measures the speed of serializing numeric dimension values using the CSS Typed OM <code>new CSSUnitValue(100, 'px').toString()</code> versus native JavaScript string
+						concatenation.
+					</p>
 				</div>
 			</div>
 		</div>

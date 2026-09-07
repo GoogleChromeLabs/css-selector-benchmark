@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>:nth-child() of S Specificity Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
+					file: 'nth-child-of-s/specific/tests.html',
 					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					label: 'Specificity',
+					desc: 'Qualification variations for :nth-last-child(n of S)',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,14 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>:nth-child() of S Specificity Benchmark</h1>
+				<p class="lead">Measuring the impact of qualifying and scoping :nth-last-child(n of S) selectors with element tags and container IDs.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">Globally Scoped</span>
+					<span class="chip">Scoped to p:nth</span>
+					<span class="chip">Scoped to p.special</span>
+					<span class="chip">Scoped to p.nth(p.special)</span>
+					<span class="chip">Scoped to #container</span>
 				</div>
 			</header>
 
@@ -668,8 +671,11 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Tests whether explicitly qualifying the subject element (e.g. <code>p:nth-last-child(...)</code>) or the selector list (<code>p.special</code>) improves matching speed compared
+						to unqualified selectors.
+					</p>
 				</div>
 			</div>
 		</div>

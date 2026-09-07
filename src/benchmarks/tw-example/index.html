@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Example Benchmark</title>
+		<title>Tailwind CSS Selectors Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -339,10 +339,10 @@
 		<script type="module">
 			const TEST_FILES = [
 				{
-					file: 'example/tests.html',
-					title: 'tests.html',
-					label: 'Example',
-					desc: 'Sample benchmark running querySelectorAll',
+					file: 'tw-example/css.html',
+					title: 'css.html',
+					label: 'Tailwind CSS',
+					desc: 'Tailwind utility selector patterns on production DOM',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -626,11 +626,14 @@
 	<body>
 		<div class="container">
 			<header>
-				<h1>Example Benchmark</h1>
-				<p class="lead">A template and reference implementation demonstrating the CSS selector benchmark runner architecture.</p>
+				<h1>Tailwind CSS Selectors Benchmark</h1>
+				<p class="lead">Benchmarking real-world Tailwind CSS selectors and complex utilities across the Tailwind marketing homepage DOM structure.</p>
 				<div class="selector-chips">
-					<span class="chip">document.querySelectorAll</span>
-					<span class="chip">example benchmark</span>
+					<span class="chip">html</span>
+					<span class="chip">crazy :has() selector</span>
+					<span class="chip">double :not()</span>
+					<span class="chip">single :not()</span>
+					<span class="chip">no :not()</span>
 				</div>
 			</header>
 
@@ -668,8 +671,11 @@
 
 			<div class="info-grid">
 				<div class="info-card">
-					<h3>About this benchmark</h3>
-					<p>Serves as a minimal baseline harness test for verifying that both the in-browser runner and headless CLI work properly.</p>
+					<h3>What is being tested?</h3>
+					<p>
+						Tests common Tailwind utility patterns such as <code>.space-y-* > :not([hidden]) ~ :not([hidden])</code> and complex escaped class names with <code>:has()</code> on an
+						authentic Tailwind page DOM.
+					</p>
 				</div>
 			</div>
 		</div>
