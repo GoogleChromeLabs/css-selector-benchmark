@@ -8,10 +8,12 @@
     "start": "serve src",
     "lint": "prettier --check '{src,test,cli}/**/*.{ts,tsx,js,jsx,html,css}'",
     "format": "prettier --write '{src,test,cli}/**/*.{ts,tsx,js,jsx,html,css}'",
+    "build": "node cli/build.js",
+    "predeploy": "npm run build",
+    "deploy": "gcloud storage rsync --recursive --delete-unmatched-destination-objects build gs://chrome-dev-demos/public/css-selector-benchmark",
     "benchmark": "node cli/index.js",
     "create": "node cli/create.js",
     "create-benchmark": "node cli/create.js",
-    "deploy": "gcloud storage rsync --recursive --delete-unmatched-destination-objects src gs://chrome-dev-demos/public/css-selector-benchmark",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
