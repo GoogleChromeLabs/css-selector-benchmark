@@ -24,6 +24,14 @@
     "twitter": "@bramus",
     "web": "https://www.bram.us/"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoogleChromeLabs/css-selector-benchmark.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoogleChromeLabs/css-selector-benchmark/issues"
+  },
+  "homepage": "https://github.com/GoogleChromeLabs/css-selector-benchmark#readme",
   "license": "Apache-2.0",
   "devDependencies": {
     "prettier": "^3.3.2",
