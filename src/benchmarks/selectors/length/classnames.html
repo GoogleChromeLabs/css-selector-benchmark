@@ -33,6 +33,7 @@
 			$container.offsetHeight; // force recalc style
 
 			function resetCSS() {
+				document.body.classList.remove('active');
 				document.adoptedStyleSheets = [];
 			}
 			function setCSS(css) {
@@ -52,12 +53,13 @@
 					PerfTestRunner.measureRunsPerSecond({
 						description: `Selector Test ${description}`,
 						setup: () => {
-							setCSS(`${selector} { color: red; }`);
+							setCSS(`body.active ${selector} { outline: 1px solid red; }`);
 						},
 						run: function () {
-							getComputedStyle($container); // force recalc style
+							document.body.classList.toggle('active');
+							$container.offsetHeight; // force recalc style
 						},
-						iterationCount: 5,
+						iterationCount: 3,
 						teardown: resetCSS,
 						done: resolve,
 					});
