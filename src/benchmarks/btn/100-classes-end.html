@@ -9,46 +9,6 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>CSS Selector Benchmark: 100 Classes (.btn-primary at end)</title>
-		<style>
-			:root {
-				--bg: #0f172a;
-				--surface: #1e293b;
-				--border: #475569;
-				--text: #f8fafc;
-				--text-muted: #94a3b8;
-				--accent: #f59e0b;
-			}
-			body {
-				font-family:
-					system-ui,
-					-apple-system,
-					sans-serif;
-				background: var(--bg);
-				color: var(--text);
-				padding: 2rem;
-			}
-			.container {
-				max-width: 900px;
-				margin: 0 auto;
-			}
-			h1 {
-				margin-bottom: 0.5rem;
-				color: var(--accent);
-			}
-			p {
-				color: var(--text-muted);
-				margin-bottom: 1rem;
-			}
-			.bench-dom-area {
-				contain: layout paint style;
-				position: absolute;
-				left: -9999px;
-				top: -9999px;
-				width: 1000px;
-				opacity: 0.01;
-				pointer-events: none;
-			}
-		</style>
 
 		<script type="module">
 			import PerfTestRunner from '/lib/PerfTestRunner.js';
@@ -117,7 +77,7 @@
 			const runTest = (description, selector) =>
 				new Promise((resolve) => {
 					PerfTestRunner.measureRunsPerSecond({
-						description: `100 Classes (End): ${description}`,
+						description,
 						setup: () => {
 							setCSS(`#container.active ${selector} { outline: 1px solid red; }`);
 						},
@@ -133,16 +93,32 @@
 
 			const average = (array) => array.reduce((a, b) => a + b, 0) / array.length;
 
-			window.startTest = () =>
+			window.getTests = () =>
+				Object.entries(selectors).map(([description, selector]) => ({
+					scenario: '100 Classes (End)',
+					description: `100 Classes (End): ${description}`,
+					selector,
+				}));
+
+			window.startTest = (onResult, onStart) =>
 				new Promise(async (resolve) => {
 					const allResults = [];
-					for (const [description, selector] of Object.entries(selectors)) {
-						const testResult = await runTest(description, selector);
-						allResults.push({
-							description,
-							selector,
-							result: average(testResult),
-						});
+					for (const test of window.getTests()) {
+						if (typeof onStart === 'function') {
+							onStart(test);
+						}
+						const testResult = await runTest(test.description, test.selector);
+						const avg = average(testResult);
+						const item = {
+							scenario: test.scenario,
+							description: test.description,
+							selector: test.selector,
+							result: Math.round(avg * 100) / 100,
+						};
+						allResults.push(item);
+						if (typeof onResult === 'function') {
+							onResult(item);
+						}
 					}
 
 					const max = Math.max(...allResults.map((r) => r.result));
@@ -159,12 +135,6 @@
 	</head>
 
 	<body>
-		<div class="container">
-			<h1>CSS Selector Benchmark: 100 Classes (End)</h1>
-			<p>Testing <code>.btn</code>, <code>[class^="btn-"]</code>, and <code>[class*=" btn-"]</code> against elements with 100 classes where <code>.btn-primary</code> is at the end.</p>
-		</div>
-		<div class="bench-dom-area">
-			<div id="container"></div>
-		</div>
+		<div id="container"></div>
 	</body>
 </html>

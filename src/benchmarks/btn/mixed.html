@@ -8,7 +8,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>CSS Selector Benchmark: 100 Classes (.btn-primary at start)</title>
+		<title>CSS Selector Benchmark: Mixed DOM</title>
 
 		<script type="module">
 			import PerfTestRunner from '/lib/PerfTestRunner.js';
@@ -22,16 +22,18 @@
 			for (let i = 1; i <= 100; i++) dummy100.push(`tok-${String(i).padStart(3, '0')}`);
 
 			const makeStart100 = (variant) => [variant, 'btn', ...dummy98].join(' ');
+			const makeEnd100 = (variant) => [...dummy98, 'btn', variant].join(' ');
+			const makeMiddle100 = (variant) => [...dummy98.slice(0, 48), variant, 'btn', ...dummy98.slice(48, 96)].join(' ');
 
-			const primaryClass = makeStart100('btn-primary');
-			const secondaryClass = makeStart100('btn-secondary');
-			const dangerClass = makeStart100('btn-danger');
-			const btnOnlyClass = ['btn', ...dummy98, 'tok-099'].join(' ');
-			const distractorClass = dummy100.join(' ');
-
-			// Populate 1500 elements with 100 classes
+			// Populate 1500 elements with mixed DOM distribution
 			const fragment = document.createDocumentFragment();
 			for (let i = 0; i < 100; i++) {
+				const primaryClass = i % 2 === 0 ? makeStart100('btn-primary') : makeEnd100('btn-primary');
+				const secondaryClass = 'btn-secondary';
+				const dangerClass = makeMiddle100('btn-danger');
+				const btnOnlyClass = 'btn';
+				const distractorClass = i % 2 === 0 ? 'card-item' : dummy100.join(' ');
+
 				const $card = createElement('div', {
 					className: `card-${i}`,
 					innerHTML: `
@@ -95,8 +97,8 @@
 
 			window.getTests = () =>
 				Object.entries(selectors).map(([description, selector]) => ({
-					scenario: '100 Classes (Start)',
-					description: `100 Classes (Start): ${description}`,
+					scenario: 'Mixed DOM',
+					description: `Mixed DOM: ${description}`,
 					selector,
 				}));
 
