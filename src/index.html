@@ -564,12 +564,56 @@
 				return ['All', ...Array.from(set).sort()];
 			}
 
+			function readStateFromUrl() {
+				const params = new URLSearchParams(window.location.search);
+				const categoryParam = params.get('category') ?? params.get('category-filter');
+				const searchParam = params.get('search') ?? params.get('q') ?? params.get('search-input');
+
+				const categories = getCategories();
+				if (categoryParam) {
+					const matched = categories.find((cat) => cat.toLowerCase() === categoryParam.toLowerCase());
+					activeCategory = matched || 'All';
+				} else {
+					activeCategory = 'All';
+				}
+
+				searchQuery = searchParam || '';
+				const searchInput = document.getElementById('search-input');
+				if (searchInput && searchInput.value !== searchQuery) {
+					searchInput.value = searchQuery;
+				}
+			}
+
+			function writeStateToUrl() {
+				const url = new URL(window.location.href);
+
+				url.searchParams.delete('category-filter');
+				url.searchParams.delete('q');
+				url.searchParams.delete('search-input');
+
+				if (activeCategory && activeCategory !== 'All') {
+					url.searchParams.set('category', activeCategory);
+				} else {
+					url.searchParams.delete('category');
+				}
+
+				if (searchQuery) {
+					url.searchParams.set('search', searchQuery);
+				} else {
+					url.searchParams.delete('search');
+				}
+
+				if (url.href !== window.location.href) {
+					window.history.replaceState(null, '', url);
+				}
+			}
+
 			function renderFilters() {
 				const filterContainer = document.getElementById('category-filter');
 				if (!filterContainer) return;
 
 				const categories = getCategories();
-				filterContainer.innerHTML = '';
+				filterContainer.replaceChildren();
 
 				categories.forEach((cat) => {
 					const btn = document.createElement('button');
@@ -578,20 +622,12 @@
 					btn.textContent = cat;
 					btn.addEventListener('click', () => {
 						activeCategory = cat;
+						writeStateToUrl();
 						renderFilters();
 						renderGrid();
 					});
 					filterContainer.appendChild(btn);
 				});
-			}
-
-			function escapeHTML(str) {
-				return String(str ?? '')
-					.replace(/&/g, '&amp;')
-					.replace(/</g, '&lt;')
-					.replace(/>/g, '&gt;')
-					.replace(/"/g, '&quot;')
-					.replace(/'/g, '&#39;');
 			}
 
 			function renderGrid() {
@@ -616,15 +652,19 @@
 				}
 
 				if (filtered.length === 0) {
-					grid.innerHTML = `
-						<div class="empty-state">
-							<p>No benchmarks found matching "<strong>${escapeHTML(searchQuery)}</strong>".</p>
-						</div>
-					`;
+					const emptyState = document.createElement('div');
+					emptyState.className = 'empty-state';
+					const p = document.createElement('p');
+					p.append('No benchmarks found matching "');
+					const strong = document.createElement('strong');
+					strong.textContent = searchQuery;
+					p.append(strong, '".');
+					emptyState.appendChild(p);
+					grid.replaceChildren(emptyState);
 					return;
 				}
 
-				grid.innerHTML = '';
+				grid.replaceChildren();
 				const dirPath = window.location.pathname.endsWith('.html')
 					? window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)
 					: window.location.pathname.endsWith('/')
@@ -636,28 +676,52 @@
 					card.href = new URL(item.path, window.location.origin + dirPath).href;
 					card.className = 'benchmark-card';
 
-					const tagsHtml = item.tags.map((t) => `<span class="card-tag">${escapeHTML(t)}</span>`).join('');
+					const topDiv = document.createElement('div');
 
-					card.innerHTML = `
-						<div>
-							<div class="card-header">
-								<h2 class="card-title">${escapeHTML(item.title)}</h2>
-								<span class="card-category">${escapeHTML(item.category)}</span>
-							</div>
-							<p class="card-desc">${escapeHTML(item.desc)}</p>
-						</div>
-						<div class="card-footer">
-							<div class="card-tags">
-								${tagsHtml}
-							</div>
-							<div class="card-cli">
-								<span class="cmd-text">npm run benchmark ${item.cli}</span>
-							</div>
-							<div class="card-action">
-								Run visual benchmark &rarr;
-							</div>
-						</div>
-					`;
+					const headerDiv = document.createElement('div');
+					headerDiv.className = 'card-header';
+
+					const titleEl = document.createElement('h2');
+					titleEl.className = 'card-title';
+					titleEl.textContent = item.title;
+
+					const categoryEl = document.createElement('span');
+					categoryEl.className = 'card-category';
+					categoryEl.textContent = item.category;
+
+					headerDiv.append(titleEl, categoryEl);
+
+					const descEl = document.createElement('p');
+					descEl.className = 'card-desc';
+					descEl.textContent = item.desc;
+
+					topDiv.append(headerDiv, descEl);
+
+					const footerDiv = document.createElement('div');
+					footerDiv.className = 'card-footer';
+
+					const tagsDiv = document.createElement('div');
+					tagsDiv.className = 'card-tags';
+					item.tags.forEach((t) => {
+						const tagSpan = document.createElement('span');
+						tagSpan.className = 'card-tag';
+						tagSpan.textContent = t;
+						tagsDiv.appendChild(tagSpan);
+					});
+
+					const cliDiv = document.createElement('div');
+					cliDiv.className = 'card-cli';
+					const cmdSpan = document.createElement('span');
+					cmdSpan.className = 'cmd-text';
+					cmdSpan.textContent = `npm run benchmark ${item.cli}`;
+					cliDiv.appendChild(cmdSpan);
+
+					const actionDiv = document.createElement('div');
+					actionDiv.className = 'card-action';
+					actionDiv.textContent = 'Run visual benchmark \u2192';
+
+					footerDiv.append(tagsDiv, cliDiv, actionDiv);
+					card.append(topDiv, footerDiv);
 					grid.appendChild(card);
 				});
 			}
@@ -680,6 +744,7 @@
 
 			function init() {
 				updateServerUrl();
+				readStateFromUrl();
 				renderFilters();
 				renderGrid();
 
@@ -687,9 +752,24 @@
 				if (searchInput) {
 					searchInput.addEventListener('input', (e) => {
 						searchQuery = e.target.value;
+						writeStateToUrl();
 						renderGrid();
 					});
 				}
+
+				window.addEventListener('popstate', () => {
+					readStateFromUrl();
+					renderFilters();
+					renderGrid();
+				});
+
+				window.addEventListener('pageshow', (e) => {
+					if (e.persisted) {
+						readStateFromUrl();
+						renderFilters();
+						renderGrid();
+					}
+				});
 			}
 
 			if (document.readyState === 'loading') {
