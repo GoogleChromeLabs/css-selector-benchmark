@@ -1,0 +1,196 @@
+<!doctype html>
+<!--
+ Copyright 2026 Google LLC
+ SPDX-License-Identifier: Apache-2.0
+-->
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Test - Light vs. Shadow DOM: Outer Page Invalidation</title>
+		<script type="module">
+			import PerfTestRunner from '../../../lib/PerfTestRunner.js';
+			import { buildComponentCSS, createLightInstance, createShadowInstance, createSeamInstance } from '../helpers.js';
+
+			const $app = document.querySelector('#app');
+			const $container = document.querySelector('#container');
+			const NUM_INSTANCES = 500;
+
+			const appShellCSS = `
+				#app.drawer-open .node {
+					border-color: #94a3b8;
+				}
+				#app.drawer-open div span {
+					color: #0284c7;
+				}
+				#app:has(.trigger-active) .comp {
+					outline-color: transparent;
+				}
+			`;
+
+			const lightCSS20 = appShellCSS + '\n' + buildComponentCSS(19, 'light');
+			const lightCSS40 = appShellCSS + '\n' + buildComponentCSS(39, 'light');
+			const shadowCSS20 = buildComponentCSS(19, 'shadow');
+			const shadowCSS40 = buildComponentCSS(39, 'shadow');
+			const seamCSS20 = buildComponentCSS(19, 'seam');
+			const seamCSS40 = buildComponentCSS(39, 'seam');
+
+			const appSheet = new CSSStyleSheet();
+			appSheet.replaceSync(appShellCSS);
+
+			const lightSheet20 = new CSSStyleSheet();
+			lightSheet20.replaceSync(lightCSS20);
+
+			const lightSheet40 = new CSSStyleSheet();
+			lightSheet40.replaceSync(lightCSS40);
+
+			const sharedSheet20 = new CSSStyleSheet();
+			sharedSheet20.replaceSync(shadowCSS20);
+
+			const sharedSheet40 = new CSSStyleSheet();
+			sharedSheet40.replaceSync(shadowCSS40);
+
+			const seamSheet20 = new CSSStyleSheet();
+			seamSheet20.replaceSync(seamCSS20);
+
+			const seamSheet40 = new CSSStyleSheet();
+			seamSheet40.replaceSync(seamCSS40);
+
+			function mountInstances(factoryFn) {
+				$container.innerHTML = '';
+				const frag = document.createDocumentFragment();
+				for (let i = 0; i < NUM_INSTANCES; i++) {
+					frag.appendChild(factoryFn());
+				}
+				$container.appendChild(frag);
+				window.getComputedStyle($container).color;
+			}
+
+			function toggleOuterAppState() {
+				$app.classList.add('drawer-open');
+				window.getComputedStyle($app).color;
+				$app.classList.remove('drawer-open');
+				window.getComputedStyle($app).color;
+			}
+
+			const tests = [
+				{
+					scenario: 'Outer Page Invalidation (500 instances)',
+					description: '20 Light DOM nodes (10k nodes exposed to page CSS)',
+					selector: '20 Light + 0 Shadow (Unencapsulated)',
+					setup: () => {
+						document.adoptedStyleSheets = [lightSheet20];
+						mountInstances(() => createLightInstance(20));
+					},
+					run: toggleOuterAppState,
+				},
+				{
+					scenario: 'Outer Page Invalidation (500 instances)',
+					description: '1 Light + 19 Shadow nodes (9.5k nodes shielded)',
+					selector: '1 Light + 19 Shadow (Encapsulated)',
+					setup: () => {
+						document.adoptedStyleSheets = [appSheet];
+						mountInstances(() => createShadowInstance(20, sharedSheet20));
+					},
+					run: toggleOuterAppState,
+				},
+				{
+					scenario: 'Outer Page Invalidation (500 instances)',
+					description: '1 Host + 10 Shadow + 9 Slotted Light (Seam)',
+					selector: '10 Light (exposed) + 10 Shadow (shielded)',
+					setup: () => {
+						document.adoptedStyleSheets = [appSheet];
+						mountInstances(() => createSeamInstance(20, seamSheet20));
+					},
+					run: toggleOuterAppState,
+				},
+				{
+					scenario: 'Outer Page Invalidation (500 instances)',
+					description: '40 Light DOM nodes (20k nodes exposed to page CSS)',
+					selector: '40 Light + 0 Shadow (Unencapsulated)',
+					setup: () => {
+						document.adoptedStyleSheets = [lightSheet40];
+						mountInstances(() => createLightInstance(40));
+					},
+					run: toggleOuterAppState,
+				},
+				{
+					scenario: 'Outer Page Invalidation (500 instances)',
+					description: '1 Light + 39 Shadow nodes (19.5k nodes shielded)',
+					selector: '1 Light + 39 Shadow (Encapsulated)',
+					setup: () => {
+						document.adoptedStyleSheets = [appSheet];
+						mountInstances(() => createShadowInstance(40, sharedSheet40));
+					},
+					run: toggleOuterAppState,
+				},
+				{
+					scenario: 'Outer Page Invalidation (500 instances)',
+					description: '1 Host + 20 Shadow + 19 Slotted Light (Seam)',
+					selector: '20 Light (exposed) + 20 Shadow (shielded)',
+					setup: () => {
+						document.adoptedStyleSheets = [appSheet];
+						mountInstances(() => createSeamInstance(40, seamSheet40));
+					},
+					run: toggleOuterAppState,
+				},
+			];
+
+			const average = (array) => (Array.isArray(array) ? array.reduce((a, b) => a + b, 0) / array.length : array);
+
+			window.getTests = () =>
+				tests.map((t) => ({
+					scenario: t.scenario,
+					description: t.description,
+					selector: t.selector,
+				}));
+
+			window.startTest = (onResult, onStart) =>
+				new Promise(async (resolve) => {
+					const allResults = [];
+					for (const test of tests) {
+						if (typeof onStart === 'function') {
+							onStart(test);
+						}
+						const res = await new Promise((resDone) => {
+							PerfTestRunner.measureRunsPerSecond({
+								description: test.description,
+								setup: test.setup,
+								run: test.run,
+								iterationCount: 3,
+								teardown: () => {
+									$container.innerHTML = '';
+									document.adoptedStyleSheets = [];
+								},
+								done: resDone,
+							});
+						});
+						const avg = average(res);
+						const item = {
+							scenario: test.scenario,
+							description: test.description,
+							selector: test.selector,
+							result: Math.round(avg * 100) / 100,
+						};
+						allResults.push(item);
+						if (typeof onResult === 'function') {
+							onResult(item);
+						}
+					}
+					const max = Math.max(...allResults.map((r) => r.result), 1);
+					resolve(
+						allResults.map((r) => {
+							r.perc = ((r.result / max) * 100).toFixed(2) + '%';
+							return r;
+						}),
+					);
+				});
+		</script>
+	</head>
+	<body>
+		<div id="app">
+			<div id="container"></div>
+		</div>
+	</body>
+</html>

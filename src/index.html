@@ -519,6 +519,38 @@
 					desc: 'Benchmarks real-world Tailwind CSS utility classes and escaped character selectors against conventional stylesheet selectors.',
 					tags: ['tailwind', 'utility classes', 'escaped selectors'],
 				},
+				{
+					path: 'benchmarks/light-vs-shadow/mount/',
+					cli: 'light-vs-shadow/mount',
+					title: 'Light vs. Shadow DOM: Mount & Style Recalc',
+					category: 'Shadow DOM',
+					desc: 'Measures DOM creation, ShadowRoot instantiation, flat-tree construction, and initial style recalculation cost across 250 instances (20 vs. 1+19 and 40 vs. 1+39).',
+					tags: ['Shadow DOM', 'Light DOM', 'adoptedStyleSheets', '<slot> seam'],
+				},
+				{
+					path: 'benchmarks/light-vs-shadow/host-recalc/',
+					cli: 'light-vs-shadow/host-recalc',
+					title: 'Light vs. Shadow DOM: Host State Recalculation',
+					category: 'Shadow DOM',
+					desc: 'Evaluates selector matching and style recalculation speed when toggling host state (.comp.active vs. :host(.active) vs. ::slotted) across 500 instances.',
+					tags: ['Shadow DOM', ':host()', '::slotted()', 'style recalculation'],
+				},
+				{
+					path: 'benchmarks/light-vs-shadow/outer-invalidation/',
+					cli: 'light-vs-shadow/outer-invalidation',
+					title: 'Light vs. Shadow DOM: Outer Page Invalidation',
+					category: 'Shadow DOM',
+					desc: 'Demonstrates the style encapsulation shield of Shadow DOM when outer application shell styles change across 500 component instances (10k–20k nodes).',
+					tags: ['Shadow DOM', 'encapsulation', 'style invalidation'],
+				},
+				{
+					path: 'benchmarks/light-vs-shadow/instance-scaling/',
+					cli: 'light-vs-shadow/instance-scaling',
+					title: 'Light vs. Shadow DOM: Instance Scaling',
+					category: 'Shadow DOM',
+					desc: 'Measures how single-instance state updates scale as total page component count increases from 100 to 1,000 instances (4,000 to 40,000 DOM nodes).',
+					tags: ['Shadow DOM', 'scaling', '40 vs 1+39'],
+				},
 			];
 
 			window.BENCHMARKS = BENCHMARKS;
@@ -553,6 +585,15 @@
 				});
 			}
 
+			function escapeHTML(str) {
+				return String(str ?? '')
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;')
+					.replace(/'/g, '&#39;');
+			}
+
 			function renderGrid() {
 				const grid = document.getElementById('benchmarks-grid');
 				const countEl = document.getElementById('benchmarks-count');
@@ -577,7 +618,7 @@
 				if (filtered.length === 0) {
 					grid.innerHTML = `
 						<div class="empty-state">
-							<p>No benchmarks found matching "<strong>${searchQuery}</strong>".</p>
+							<p>No benchmarks found matching "<strong>${escapeHTML(searchQuery)}</strong>".</p>
 						</div>
 					`;
 					return;
@@ -595,15 +636,15 @@
 					card.href = new URL(item.path, window.location.origin + dirPath).href;
 					card.className = 'benchmark-card';
 
-					const tagsHtml = item.tags.map((t) => `<span class="card-tag">${t}</span>`).join('');
+					const tagsHtml = item.tags.map((t) => `<span class="card-tag">${escapeHTML(t)}</span>`).join('');
 
 					card.innerHTML = `
 						<div>
 							<div class="card-header">
-								<h2 class="card-title">${item.title}</h2>
-								<span class="card-category">${item.category}</span>
+								<h2 class="card-title">${escapeHTML(item.title)}</h2>
+								<span class="card-category">${escapeHTML(item.category)}</span>
 							</div>
-							<p class="card-desc">${item.desc}</p>
+							<p class="card-desc">${escapeHTML(item.desc)}</p>
 						</div>
 						<div class="card-footer">
 							<div class="card-tags">

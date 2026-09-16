@@ -83,7 +83,7 @@ page.on('console', (message) => {
 
 // Catch server not running
 page.on('requestfailed', (request) => {
-
+	const errorText = request.failure()?.errorText;
 	switch (errorText) {
 		case 'net::ERR_CONNECTION_REFUSED':
 			console.error(`❌ Could not connect to server`);

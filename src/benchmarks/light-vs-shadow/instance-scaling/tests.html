@@ -1,0 +1,166 @@
+<!doctype html>
+<!--
+ Copyright 2026 Google LLC
+ SPDX-License-Identifier: Apache-2.0
+-->
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Test - Light vs. Shadow DOM: Instance Scaling</title>
+		<script type="module">
+			import PerfTestRunner from '../../../lib/PerfTestRunner.js';
+			import { buildComponentCSS, createLightInstance, createShadowInstance } from '../helpers.js';
+
+			const $container = document.querySelector('#container');
+
+			const lightCSS40 = buildComponentCSS(39, 'light');
+			const shadowCSS40 = buildComponentCSS(39, 'shadow');
+
+			const lightSheet40 = new CSSStyleSheet();
+			lightSheet40.replaceSync(lightCSS40);
+
+			const sharedSheet40 = new CSSStyleSheet();
+			sharedSheet40.replaceSync(shadowCSS40);
+
+			let instances = [];
+
+			function setupInstances(count, isShadow) {
+				$container.innerHTML = '';
+				instances = [];
+				document.adoptedStyleSheets = isShadow ? [] : [lightSheet40];
+				const frag = document.createDocumentFragment();
+				for (let i = 0; i < count; i++) {
+					const el = isShadow ? createShadowInstance(40, sharedSheet40) : createLightInstance(40);
+					instances.push(el);
+					frag.appendChild(el);
+				}
+				$container.appendChild(frag);
+				window.getComputedStyle($container).color;
+			}
+
+			// Test updating a single component instance out of N instances on the page
+			function toggleSingleInstanceState() {
+				const target = instances[Math.floor(instances.length / 2)];
+				target.classList.add('active');
+				window.getComputedStyle($container).color;
+				target.classList.remove('active');
+				window.getComputedStyle($container).color;
+			}
+
+			const tests = [
+				{
+					scenario: 'Single-Instance Update Scaling (40 vs 1+39)',
+					description: '100 Instances — 40 Light DOM (4k total nodes)',
+					selector: '100 × 40 Light',
+					setup: () => setupInstances(100, false),
+					run: toggleSingleInstanceState,
+				},
+				{
+					scenario: 'Single-Instance Update Scaling (40 vs 1+39)',
+					description: '100 Instances — 1+39 Shadow DOM (4k total nodes)',
+					selector: '100 × (1+39 Shadow)',
+					setup: () => setupInstances(100, true),
+					run: toggleSingleInstanceState,
+				},
+				{
+					scenario: 'Single-Instance Update Scaling (40 vs 1+39)',
+					description: '250 Instances — 40 Light DOM (10k total nodes)',
+					selector: '250 × 40 Light',
+					setup: () => setupInstances(250, false),
+					run: toggleSingleInstanceState,
+				},
+				{
+					scenario: 'Single-Instance Update Scaling (40 vs 1+39)',
+					description: '250 Instances — 1+39 Shadow DOM (10k total nodes)',
+					selector: '250 × (1+39 Shadow)',
+					setup: () => setupInstances(250, true),
+					run: toggleSingleInstanceState,
+				},
+				{
+					scenario: 'Single-Instance Update Scaling (40 vs 1+39)',
+					description: '500 Instances — 40 Light DOM (20k total nodes)',
+					selector: '500 × 40 Light',
+					setup: () => setupInstances(500, false),
+					run: toggleSingleInstanceState,
+				},
+				{
+					scenario: 'Single-Instance Update Scaling (40 vs 1+39)',
+					description: '500 Instances — 1+39 Shadow DOM (20k total nodes)',
+					selector: '500 × (1+39 Shadow)',
+					setup: () => setupInstances(500, true),
+					run: toggleSingleInstanceState,
+				},
+				{
+					scenario: 'Single-Instance Update Scaling (40 vs 1+39)',
+					description: '1000 Instances — 40 Light DOM (40k total nodes)',
+					selector: '1000 × 40 Light',
+					setup: () => setupInstances(1000, false),
+					run: toggleSingleInstanceState,
+				},
+				{
+					scenario: 'Single-Instance Update Scaling (40 vs 1+39)',
+					description: '1000 Instances — 1+39 Shadow DOM (40k total nodes)',
+					selector: '1000 × (1+39 Shadow)',
+					setup: () => setupInstances(1000, true),
+					run: toggleSingleInstanceState,
+				},
+			];
+
+			const average = (array) => (Array.isArray(array) ? array.reduce((a, b) => a + b, 0) / array.length : array);
+
+			window.getTests = () =>
+				tests.map((t) => ({
+					scenario: t.scenario,
+					description: t.description,
+					selector: t.selector,
+				}));
+
+			window.startTest = (onResult, onStart) =>
+				new Promise(async (resolve) => {
+					const allResults = [];
+					for (const test of tests) {
+						if (typeof onStart === 'function') {
+							onStart(test);
+						}
+						const res = await new Promise((resDone) => {
+							PerfTestRunner.measureRunsPerSecond({
+								description: test.description,
+								setup: test.setup,
+								run: test.run,
+								iterationCount: 3,
+								teardown: () => {
+									$container.innerHTML = '';
+									instances = [];
+									document.adoptedStyleSheets = [];
+								},
+								done: resDone,
+							});
+						});
+						const avg = average(res);
+						const item = {
+							scenario: test.scenario,
+							description: test.description,
+							selector: test.selector,
+							result: Math.round(avg * 100) / 100,
+						};
+						allResults.push(item);
+						if (typeof onResult === 'function') {
+							onResult(item);
+						}
+					}
+					const max = Math.max(...allResults.map((r) => r.result), 1);
+					resolve(
+						allResults.map((r) => {
+							r.perc = ((r.result / max) * 100).toFixed(2) + '%';
+							return r;
+						}),
+					);
+				});
+		</script>
+	</head>
+	<body>
+		<div id="container"></div>
+	</body>
+</html>

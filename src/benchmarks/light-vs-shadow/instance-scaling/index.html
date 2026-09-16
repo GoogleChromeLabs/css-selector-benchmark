@@ -1,86 +1,6 @@
-/**
- * Copyright 2024 Google LLC
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import readline from 'readline/promises';
-import { stdin as input, stdout as output } from 'process';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
-
-let benchmarkName = process.argv[2];
-
-if (!benchmarkName) {
-	const rl = readline.createInterface({ input, output });
-	benchmarkName = await rl.question('Enter benchmark name (e.g. has/new): ');
-	rl.close();
-}
-
-benchmarkName = benchmarkName ? benchmarkName.trim().replace(/^\/+|\/+$/g, '') : '';
-
-if (!benchmarkName) {
-	console.error('❌ Error: Benchmark name cannot be empty.');
-	process.exit(1);
-}
-
-const targetDir = path.resolve(rootDir, 'src', 'benchmarks', benchmarkName);
-
-if (fs.existsSync(targetDir)) {
-	console.warn(`⚠️ Warning: Benchmark "${benchmarkName}" already exists at src/benchmarks/${benchmarkName}. Aborting.`);
-	process.exit(1);
-}
-
-fs.mkdirSync(targetDir, { recursive: true });
-
-function formatTitle(name) {
-	return name
-		.split('/')
-		.map((part) =>
-			part
-				.split('-')
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				.join(' '),
-		)
-		.join(' - ');
-}
-
-function getCategory(name) {
-	const first = name.split('/')[0].toLowerCase();
-	if (first === 'has') return ':has()';
-	if (first === 'nth-child-of-s' || first === 'nth-child') return ':nth-child()';
-	if (first === 'scope') return '@scope';
-	if (first === 'nesting') return 'Nesting';
-	if (first === 'is') return 'Pseudo-classes';
-	if (first === 'at-property' || first === 'at-rule') return 'At-Rules';
-	if (first === 'cssom') return 'CSSOM';
-	if (first === 'btn') return 'Class & Attribute';
-	if (first === 'selectors') return 'Combinators';
-	if (first === 'light-vs-shadow') return 'Shadow DOM';
-	return formatTitle(first);
-}
-
-function serializeBenchmarks(benchmarks) {
-	const items = benchmarks.map((b) => {
-		return `\t\t\t\t{\n\t\t\t\t\tpath: '${b.path}',\n\t\t\t\t\tcli: '${b.cli}',\n\t\t\t\t\ttitle: '${b.title.replace(/'/g, "\\'")}',\n\t\t\t\t\tcategory: '${b.category.replace(/'/g, "\\'")}',\n\t\t\t\t\tdesc: '${b.desc.replace(/'/g, "\\'")}',\n\t\t\t\t\ttags: [${b.tags.map((t) => `'${t.replace(/'/g, "\\'")}'`).join(', ')}],\n\t\t\t\t}`;
-	});
-	return `[\n${items.join(',\n')},\n\t\t\t]`;
-}
-
-const displayTitle = formatTitle(benchmarkName);
-const testRelPath = `${benchmarkName}/tests.html`;
-const currentYear = new Date().getFullYear();
-const depth = benchmarkName.split('/').length + 1;
-const relToSrc = '../'.repeat(depth);
-const relToLib = relToSrc + 'lib';
-
-const testsHtmlContent = `<!doctype html>
+<!doctype html>
 <!--
- Copyright ${currentYear} Google LLC
+ Copyright 2026 Google LLC
  SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -88,113 +8,7 @@ const testsHtmlContent = `<!doctype html>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Test - ${displayTitle}</title>
-		<script type="module">
-			import PerfTestRunner from '${relToLib}/PerfTestRunner.js';
-			import { createElement } from '${relToLib}/DOM.js';
-
-			const $container = document.querySelector('#container');
-
-			function makeTree(parentEl, numSiblings) {
-				for (let i = 0; i <= numSiblings; i++) {
-					parentEl.appendChild(
-						createElement('div', {
-							className: \`item item-\${i}\`,
-							innerHTML: \`<div class="child"><span class="label">Item \${i}</span></div>\`,
-						}),
-					);
-				}
-			}
-
-			makeTree($container, 1000);
-			$container.offsetHeight; // force recalc style
-
-			function resetCSS() {
-				document.adoptedStyleSheets = [];
-			}
-			function setCSS(css) {
-				const stylesheet = new CSSStyleSheet();
-				stylesheet.replaceSync(css);
-				document.adoptedStyleSheets = [stylesheet];
-			}
-
-			const selectors = {
-				'Baseline selector': '.item',
-				'Deep selector': '.item .child .label',
-			};
-
-			const runTest = (description, selector) =>
-				new Promise((resolve, reject) => {
-					PerfTestRunner.measureRunsPerSecond({
-						description: \`Selector Test \${description}\`,
-						setup: () => {
-							setCSS(\`\${selector} { color: red; }\`);
-						},
-						run: function () {
-							$container.offsetHeight; // force recalc style
-						},
-						iterationCount: 5,
-						teardown: resetCSS,
-						done: resolve,
-					});
-				});
-
-			const average = (array) => (Array.isArray(array) ? array.reduce((a, b) => a + b, 0) / array.length : array);
-
-			window.getTests = () =>
-				Object.entries(selectors).map(([description, selector]) => ({
-					scenario: '${displayTitle}',
-					description,
-					selector,
-				}));
-
-			window.startTest = (onResult, onStart) =>
-				new Promise(async (resolve) => {
-					const allResults = [];
-					for (const test of window.getTests()) {
-						if (typeof onStart === 'function') {
-							onStart(test);
-						}
-						const testResult = await runTest(test.description, test.selector);
-						const avg = average(testResult);
-						const item = {
-							scenario: test.scenario,
-							description: test.description,
-							selector: test.selector,
-							result: Math.round(avg * 100) / 100,
-						};
-						allResults.push(item);
-						if (typeof onResult === 'function') {
-							onResult(item);
-						}
-					}
-					const max = Math.max(...allResults.map((r) => r.result), 1);
-					resolve(
-						allResults.map((r) => {
-							r.perc = ((r.result / max) * 100).toFixed(2) + '%';
-							return r;
-						}),
-					);
-				});
-		</script>
-	</head>
-	<body>
-		<div id="container"></div>
-	</body>
-</html>
-`;
-
-const indexHtmlContent = `<!doctype html>
-<!--
- Copyright ${currentYear} Google LLC
- SPDX-License-Identifier: Apache-2.0
--->
-
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>CSS ${displayTitle} Benchmark</title>
+		<title>Light vs. Shadow DOM: Instance Scaling Benchmark</title>
 		<style>
 			:root {
 				--bg: #f8fafc;
@@ -233,7 +47,7 @@ const indexHtmlContent = `<!doctype html>
 			}
 
 			.container {
-				max-width: 1080px;
+				max-width: 1200px;
 				margin: 0 auto;
 			}
 
@@ -515,12 +329,14 @@ const indexHtmlContent = `<!doctype html>
 		</style>
 
 		<script type="module">
+			import { initTopologyDiagrams, renderDiagramTriggerButton } from '../diagrams.js';
+
 			const TEST_FILES = [
 				{
-					file: '${testRelPath}',
+					file: 'light-vs-shadow/instance-scaling/tests.html',
 					title: 'tests.html',
-					label: '${displayTitle}',
-					desc: 'Benchmark tests in tests.html',
+					label: 'Instance Scaling (100 to 1,000 instances)',
+					desc: 'Single-instance state update scaling across 100, 250, 500, and 1,000 instances (40 vs 1+39)',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -590,16 +406,16 @@ const indexHtmlContent = `<!doctype html>
 				listEl.innerHTML = '';
 				TEST_FILES.forEach((testFile) => {
 					const li = document.createElement('li');
-					const countInfo = typeof testFile.testCount === 'number' ? \` (\${testFile.testCount} tests)\` : '';
+					const countInfo = typeof testFile.testCount === 'number' ? ` (${testFile.testCount} tests)` : '';
 					const filename = testFile.file.includes('/') ? testFile.file.substring(testFile.file.lastIndexOf('/') + 1) : testFile.file;
-					const folder = window.location.pathname.replace(/\\/$/, '').split('/').pop();
-					const href = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('.html') ? filename : \`\${folder}/\${filename}\`;
-					li.innerHTML = \`
-						<a href="\${href}">
-							<strong>\${escapeHTML(testFile.title)}</strong>
-							<span>\${escapeHTML(testFile.desc + countInfo)}</span>
+					const folder = window.location.pathname.replace(/\/$/, '').split('/').pop();
+					const href = window.location.pathname.endsWith('/') || window.location.pathname.endsWith('.html') ? filename : `${folder}/${filename}`;
+					li.innerHTML = `
+						<a href="${href}">
+							<strong>${escapeHTML(testFile.title)}</strong>
+							<span>${escapeHTML(testFile.desc + countInfo)}</span>
 						</a>
-					\`;
+					`;
 					listEl.appendChild(li);
 				});
 			}
@@ -609,11 +425,11 @@ const indexHtmlContent = `<!doctype html>
 				if (!tbody) return;
 
 				if (!allResults || allResults.length === 0) {
-					tbody.innerHTML = \`
+					tbody.innerHTML = `
 						<tr>
 							<td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem">Discovering benchmark tests from files…</td>
 						</tr>
-					\`;
+					`;
 					return;
 				}
 
@@ -629,44 +445,49 @@ const indexHtmlContent = `<!doctype html>
 
 					if (item.status === 'completed' && typeof item.result === 'number') {
 						const pct = (item.result / max) * 100;
-						runsPerSecHtml = \`<strong>\${Math.round(item.result).toLocaleString()}</strong> <span class="unit">runs/s</span>\`;
-						barHtml = \`
+						runsPerSecHtml = `<strong>${Math.round(item.result).toLocaleString()}</strong> <span class="unit">runs/s</span>`;
+						barHtml = `
 							<div class="bar-container">
 								<div class="bar-track">
-									<div class="bar-fill" style="width: \${pct}%"></div>
+									<div class="bar-fill" style="width: ${pct}%"></div>
 								</div>
-								<span class="bar-pct">\${pct.toFixed(1)}%</span>
+								<span class="bar-pct">${pct.toFixed(1)}%</span>
 							</div>
-						\`;
+						`;
 					} else if (item.status === 'running') {
-						runsPerSecHtml = \`<span style="color: var(--accent); font-weight: 500;">Running…</span>\`;
-						barHtml = \`
+						runsPerSecHtml = `<span style="color: var(--accent); font-weight: 500;">Running…</span>`;
+						barHtml = `
 							<div class="bar-container">
 								<div class="bar-track">
 									<div class="bar-fill" style="width: 100%; animation: pulse 1s infinite;"></div>
 								</div>
 								<span class="bar-pct" style="color: var(--accent)">…</span>
 							</div>
-						\`;
+						`;
 					} else {
-						runsPerSecHtml = \`<span style="color: var(--text-muted)">Pending…</span>\`;
-						barHtml = \`
+						runsPerSecHtml = `<span style="color: var(--text-muted)">Pending…</span>`;
+						barHtml = `
 							<div class="bar-container">
 								<div class="bar-track">
 									<div class="bar-fill" style="width: 0%"></div>
 								</div>
 								<span class="bar-pct">—</span>
 							</div>
-						\`;
+						`;
 					}
 
-					tr.innerHTML = \`
-						<td><strong>\${escapeHTML(item.scenario)}</strong></td>
-						<td><code class="code-tag">\${escapeHTML(item.selector || item.css || '—')}</code></td>
-						<td>\${escapeHTML(item.description)}</td>
-						<td>\${runsPerSecHtml}</td>
-						<td>\${barHtml}</td>
-					\`;
+					tr.innerHTML = `
+						<td><strong>${escapeHTML(item.scenario)}</strong></td>
+						<td>
+							<div class="topology-cell-wrapper">
+								<code class="code-tag">${escapeHTML(item.selector || item.css || '—')}</code>
+								${renderDiagramTriggerButton('instance-scaling', item.selector || item.css || '', item.description || '')}
+							</div>
+						</td>
+						<td>${escapeHTML(item.description)}</td>
+						<td>${runsPerSecHtml}</td>
+						<td>${barHtml}</td>
+					`;
 					tbody.appendChild(tr);
 				});
 			}
@@ -701,11 +522,11 @@ const indexHtmlContent = `<!doctype html>
 
 				const totalTests = allResults.length;
 				if (statusEl) {
-					statusEl.textContent = \`Ready to run \${totalTests} tests across \${TEST_FILES.length} files (or invoke window.startTest() in console)\`;
+					statusEl.textContent = `Ready to run ${totalTests} tests (or invoke window.startTest() in console)`;
 				}
 				const btnRun = document.getElementById('btn-run');
 				if (btnRun) {
-					btnRun.textContent = \`Run Benchmark (\${totalTests} tests)\`;
+					btnRun.textContent = `Run Benchmark (${totalTests} tests)`;
 				}
 			}
 
@@ -730,13 +551,13 @@ const indexHtmlContent = `<!doctype html>
 				for (let i = 0; i < TEST_FILES.length; i++) {
 					const fileConfig = TEST_FILES[i];
 					if (statusEl) {
-						statusEl.textContent = \`Loading (\${i + 1}/\${TEST_FILES.length}): \${fileConfig.title}…\`;
+						statusEl.textContent = `Loading (${i + 1}/${TEST_FILES.length}): ${fileConfig.title}…`;
 					}
 
 					try {
 						const iframe = await loadIframe(fileConfig.file);
 						if (typeof iframe.contentWindow.startTest !== 'function') {
-							throw new Error(\`window.startTest is not defined in \${fileConfig.file}\`);
+							throw new Error(`window.startTest is not defined in ${fileConfig.file}`);
 						}
 						await iframe.contentWindow.startTest(
 							(liveItem) => {
@@ -747,7 +568,7 @@ const indexHtmlContent = `<!doctype html>
 									target.result = liveItem.result;
 								}
 								if (statusEl) {
-									statusEl.textContent = \`Completed (\${completedCount}/\${totalTests}): \${liveItem.description}…\`;
+									statusEl.textContent = `Completed (${completedCount}/${totalTests}): ${liveItem.description}…`;
 								}
 								renderTable();
 							},
@@ -760,13 +581,13 @@ const indexHtmlContent = `<!doctype html>
 									}
 								});
 								if (statusEl) {
-									statusEl.textContent = \`Running (\${completedCount + 1}/\${totalTests}): \${startItem.description}…\`;
+									statusEl.textContent = `Running (${completedCount + 1}/${totalTests}): ${startItem.description}…`;
 								}
 								renderTable();
 							},
 						);
 					} catch (err) {
-						console.error(\`Error running \${fileConfig.file}:\`, err);
+						console.error(`Error running ${fileConfig.file}:`, err);
 					}
 				}
 
@@ -780,7 +601,7 @@ const indexHtmlContent = `<!doctype html>
 				}));
 
 				if (statusEl) {
-					statusEl.textContent = \`Benchmark completed (\${formattedResults.length} tests run)\`;
+					statusEl.textContent = `Benchmark completed (${formattedResults.length} tests run)`;
 				}
 				if (btnRun) btnRun.disabled = false;
 
@@ -788,6 +609,7 @@ const indexHtmlContent = `<!doctype html>
 			};
 
 			function init() {
+				initTopologyDiagrams('instance-scaling');
 				renderTestsList();
 				renderTable();
 
@@ -808,25 +630,51 @@ const indexHtmlContent = `<!doctype html>
 			}
 		</script>
 	</head>
-
 	<body>
 		<div class="container">
-			<nav class="nav-back">
-				<a href="${relToSrc}" class="btn-back">&larr; Back to index</a>
-			</nav>
+			<div class="nav-back">
+				<a href="../../../" class="btn-back">&larr; Back to index</a>
+			</div>
+
 			<header>
-				<h1>CSS ${displayTitle} Benchmark</h1>
-				<p class="lead">Benchmark measuring style recalculation performance for ${displayTitle}.</p>
+				<h1>Light vs. Shadow DOM: Instance Scaling</h1>
+				<p class="lead">
+					Measures how single-instance state updates scale as total page component count increases from
+					<strong>100 to 1,000 instances</strong> (4,000 to 40,000 total DOM nodes) comparing 40 Light DOM nodes vs. 1 Light + 39 Shadow DOM nodes.
+				</p>
 				<div class="selector-chips">
-					<span class="chip">.item</span>
-					<span class="chip">.item .child .label</span>
+					<span class="chip">100 Instances (4k nodes)</span>
+					<span class="chip">250 Instances (10k nodes)</span>
+					<span class="chip">500 Instances (20k nodes)</span>
+					<span class="chip">1,000 Instances (40k nodes)</span>
 				</div>
 			</header>
 
+			<div class="info-grid">
+				<div class="info-card">
+					<h3>What is being tested?</h3>
+					<p>
+						With 100, 250, 500, or 1,000 component instances mounted on the page, the test toggles the
+						<code>.active</code> state on a single component instance in the middle of the tree and forces style recalculation via <code>getComputedStyle($container).color</code> without
+						triggering layout.
+					</p>
+				</div>
+				<div class="info-card">
+					<h3>Baseline Takeaway</h3>
+					<p>
+						When measuring pure style recalculation (without layout), Blink's style invalidation sets keep single-instance updates fast in both Light DOM and Shadow DOM
+						(30,500&ndash;48,500 runs/s). Light DOM maintains a consistent ~10&ndash;12% style-recalc advantage across 100 to 1,000 instances (compared to layout-included tests where Light
+						DOM's global layout invalidation caused Shadow DOM to overtake at 500+ instances).
+					</p>
+				</div>
+			</div>
+
+			<div id="topology-gallery-mount"></div>
+
 			<div class="controls-card">
 				<div class="control-group">
-					<button type="button" id="btn-run" class="btn-primary">Run Benchmark</button>
-					<span id="status" class="status-text">Discovering benchmark tests from files…</span>
+					<button id="btn-run" class="btn-primary">Run Benchmark</button>
+					<span id="status" class="status-text">Initializing…</span>
 				</div>
 			</div>
 
@@ -836,77 +684,20 @@ const indexHtmlContent = `<!doctype html>
 					<thead>
 						<tr>
 							<th>Scenario</th>
-							<th>Selector</th>
+							<th>Topology</th>
 							<th>Description</th>
-							<th>Runs / Second</th>
+							<th>Speed</th>
 							<th>Relative Performance</th>
 						</tr>
 					</thead>
-					<tbody id="results-body">
-						<tr>
-							<td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem">Discovering benchmark tests from files…</td>
-						</tr>
-					</tbody>
+					<tbody id="results-body"></tbody>
 				</table>
 			</div>
 
 			<div class="card">
 				<h2>Tests in this Folder</h2>
-				<ul class="tests-list" id="tests-list"></ul>
-			</div>
-
-			<div class="info-grid">
-				<div class="info-card">
-					<h3>What is being tested?</h3>
-					<p>Benchmarks style recalculation performance for ${displayTitle}.</p>
-				</div>
+				<ul id="tests-list" class="tests-list"></ul>
 			</div>
 		</div>
 	</body>
 </html>
-`;
-
-fs.writeFileSync(path.join(targetDir, 'index.html'), indexHtmlContent, 'utf-8');
-fs.writeFileSync(path.join(targetDir, 'tests.html'), testsHtmlContent, 'utf-8');
-
-// Update BENCHMARKS array in src/index.html
-const mainIndexPath = path.resolve(rootDir, 'src', 'index.html');
-if (fs.existsSync(mainIndexPath)) {
-	const mainIndexContent = fs.readFileSync(mainIndexPath, 'utf-8');
-	const benchmarksMatch = mainIndexContent.match(/const BENCHMARKS = (\[[\s\S]*?\n\t\t\t\]);/);
-	if (benchmarksMatch) {
-		try {
-			const benchmarks = eval(benchmarksMatch[1]);
-			const newEntry = {
-				path: `benchmarks/${benchmarkName}/`,
-				cli: benchmarkName,
-				title: displayTitle.toLowerCase().startsWith('css') ? displayTitle : `CSS ${displayTitle}`,
-				category: getCategory(benchmarkName),
-				desc: `Benchmark measuring style recalculation performance for ${displayTitle}.`,
-				tags: [benchmarkName.split('/').pop(), 'recalc', 'benchmark'],
-			};
-
-			const existingIndex = benchmarks.findIndex((b) => b.cli === benchmarkName);
-			if (existingIndex >= 0) {
-				benchmarks[existingIndex] = newEntry;
-			} else {
-				benchmarks.push(newEntry);
-			}
-
-			benchmarks.sort((a, b) => a.cli.localeCompare(b.cli));
-
-			const serialized = serializeBenchmarks(benchmarks);
-			const updatedMainIndexContent = mainIndexContent.replace(benchmarksMatch[1], serialized);
-			fs.writeFileSync(mainIndexPath, updatedMainIndexContent, 'utf-8');
-		} catch (err) {
-			console.error('⚠️ Could not update BENCHMARKS array in src/index.html:', err.message);
-		}
-	}
-}
-
-console.log(`✅ Created benchmark at src/benchmarks/${benchmarkName}`);
-console.log(`  - src/benchmarks/${benchmarkName}/index.html`);
-console.log(`  - src/benchmarks/${benchmarkName}/tests.html`);
-console.log(`  - Updated src/index.html (BENCHMARKS array)`);
-console.log(`\nTo run this benchmark:`);
-console.log(`  npm run benchmark ${benchmarkName}`);
