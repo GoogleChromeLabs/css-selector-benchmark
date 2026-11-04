@@ -41,7 +41,7 @@ PerfTestRunner.now =
 	window.performance && window.performance.now
 		? function () {
 				return window.performance.now();
-		  }
+			}
 		: Date.now;
 
 PerfTestRunner.logInfo = function (text) {
@@ -172,7 +172,6 @@ function start(test, scheduler, runner) {
 	reset();
 	currentTest = test;
 
-
 	if (currentTest.description) PerfTestRunner.logInfo('Description: ' + currentTest.description);
 
 	if (currentTest.bootstrap) currentTest.bootstrap();
@@ -209,7 +208,7 @@ function start(test, scheduler, runner) {
 			'Tracing based metrics are specified but ' +
 				'tracing is not supported on this platform. To get those ' +
 				'metrics from this test, you can run the test using ' +
-				'tools/perf/run_benchmarks script.'
+				'tools/perf/run_benchmarks script.',
 		);
 	}
 	scheduleNextRun(scheduler, runner);
