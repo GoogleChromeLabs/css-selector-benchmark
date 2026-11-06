@@ -17,21 +17,21 @@
 
 			let $outer;
 			let $target;
-			let $directChildBtn;
-			let $deepChildBtn;
-			let $outerBtn;
+			let $directChildLink;
+			let $deepChildLink;
+			let $outerLink;
 
 			function makeSubtree(parentEl, count, prefix) {
 				const frag = document.createDocumentFragment();
 				for (let i = 0; i < count; i++) {
-					const $btn = createElement('button', {
-						type: 'button',
-						className: `btn ${prefix}-btn-${i}`,
+					const $link = createElement('a', {
+						href: '#',
+						className: `link ${prefix}-link-${i}`,
 						textContent: `Item ${i}`,
 					});
 					const $layer2 = createElement('div', {
 						className: 'layer2',
-						children: [$btn],
+						children: [$link],
 					});
 					const $layer1 = createElement('div', {
 						className: 'layer1',
@@ -53,43 +53,67 @@
 				$container.append($outer, $target);
 
 				makeSubtree($outer, 500, 'outer');
-				$directChildBtn = createElement('button', {
-					id: 'direct-btn',
-					type: 'button',
-					className: 'btn direct-btn',
-					textContent: 'Direct Child Button',
+				$directChildLink = createElement('a', {
+					id: 'direct-link',
+					href: '#',
+					className: 'link direct-link',
+					textContent: 'Direct Child Link',
 				});
-				$target.appendChild($directChildBtn);
+				$target.appendChild($directChildLink);
 				makeSubtree($target, 500, 'target');
 
-				$deepChildBtn = $target.querySelector('.target-btn-499');
-				$outerBtn = $outer.querySelector('.outer-btn-499');
+				$deepChildLink = $target.querySelector('.target-link-499');
+				$outerLink = $outer.querySelector('.outer-link-499');
 			}
 
 			const selectors = [
 				{
-					description: ':root prefix with child combinator (>)',
+					description: ':root prefix with child combinator (>) (:focus)',
 					selector: ':root:has(> :focus)',
 				},
 				{
-					description: ':root prefix with descendant combinator',
+					description: ':root prefix with child combinator (>) (a:focus)',
+					selector: ':root:has(> a:focus)',
+				},
+				{
+					description: ':root prefix with descendant combinator (:focus)',
 					selector: ':root:has(:focus)',
 				},
 				{
-					description: '#target prefix with child combinator (>)',
+					description: ':root prefix with descendant combinator (a:focus)',
+					selector: ':root:has(a:focus)',
+				},
+				{
+					description: '#target prefix with child combinator (>) (:focus)',
 					selector: '#target:has(> :focus)',
 				},
 				{
-					description: '#target prefix with descendant combinator',
+					description: '#target prefix with child combinator (>) (a:focus)',
+					selector: '#target:has(> a:focus)',
+				},
+				{
+					description: '#target prefix with descendant combinator (:focus)',
 					selector: '#target:has(:focus)',
 				},
 				{
-					description: 'Repeated #target inside :has() with descendant combinator',
+					description: '#target prefix with descendant combinator (a:focus)',
+					selector: '#target:has(a:focus)',
+				},
+				{
+					description: 'Repeated #target inside :has() with descendant combinator (:focus)',
 					selector: '#target:has(#target :focus)',
 				},
 				{
-					description: 'Repeated #target inside :has() with child combinator (>)',
+					description: 'Repeated #target inside :has() with descendant combinator (a:focus)',
+					selector: '#target:has(#target a:focus)',
+				},
+				{
+					description: 'Repeated #target inside :has() with child combinator (>) (:focus)',
 					selector: '#target:has(#target > :focus)',
+				},
+				{
+					description: 'Repeated #target inside :has() with child combinator (>) (a:focus)',
+					selector: '#target:has(#target > a:focus)',
 				},
 			];
 
@@ -103,21 +127,21 @@
 				document.adoptedStyleSheets = [stylesheet];
 			}
 
-			const runFocusToggleTest = (description, selector, getBtn) =>
+			const runFocusToggleTest = (description, selector, getEl) =>
 				new Promise((resolve) => {
-					let $btn;
+					let $el;
 					PerfTestRunner.measureRunsPerSecond({
 						description: `Selector Test ${description}`,
 						setup: () => {
 							buildDOM();
 							setCSS(`${selector} { outline-color: red; }`);
-							$btn = getBtn();
+							$el = getEl();
 							window.getComputedStyle($target).outlineColor;
 						},
 						run: function () {
-							$btn.focus();
+							$el.focus();
 							window.getComputedStyle($target).outlineColor;
-							$btn.blur();
+							$el.blur();
 							window.getComputedStyle($target).outlineColor;
 						},
 						iterationCount: 3,
@@ -133,19 +157,19 @@
 
 			window.getTests = () => [
 				...selectors.map((s) => ({
-					scenario: '1. Direct Child Focus (#target > button)',
+					scenario: '1. Direct Child Focus (#target > a)',
 					description: `Direct Focus: ${s.description}`,
 					selector: s.selector,
 					mode: 'direct',
 				})),
 				...selectors.map((s) => ({
-					scenario: '2. Deep Descendant Focus (#target .deep button)',
+					scenario: '2. Deep Descendant Focus (#target .deep a)',
 					description: `Deep Focus: ${s.description}`,
 					selector: s.selector,
 					mode: 'deep',
 				})),
 				...selectors.map((s) => ({
-					scenario: '3. Outer Element Focus (#outer button)',
+					scenario: '3. Outer Element Focus (#outer a)',
 					description: `Outer Focus: ${s.description}`,
 					selector: s.selector,
 					mode: 'outer',
@@ -161,11 +185,11 @@
 						}
 						let testResult;
 						if (test.mode === 'direct') {
-							testResult = await runFocusToggleTest(test.description, test.selector, () => $directChildBtn);
+							testResult = await runFocusToggleTest(test.description, test.selector, () => $directChildLink);
 						} else if (test.mode === 'deep') {
-							testResult = await runFocusToggleTest(test.description, test.selector, () => $deepChildBtn);
+							testResult = await runFocusToggleTest(test.description, test.selector, () => $deepChildLink);
 						} else {
-							testResult = await runFocusToggleTest(test.description, test.selector, () => $outerBtn);
+							testResult = await runFocusToggleTest(test.description, test.selector, () => $outerLink);
 						}
 						const avg = average(testResult);
 						const item = {
