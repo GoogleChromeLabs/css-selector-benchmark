@@ -19,7 +19,6 @@
 			let $target;
 			let $directChildLink;
 			let $deepChildLink;
-			let $outerLink;
 
 			function makeSubtree(parentEl, count, prefix) {
 				const frag = document.createDocumentFragment();
@@ -63,18 +62,9 @@
 				makeSubtree($target, 500, 'target');
 
 				$deepChildLink = $target.querySelector('.target-link-499');
-				$outerLink = $outer.querySelector('.outer-link-499');
 			}
 
-			const selectors = [
-				{
-					description: ':root prefix with child combinator (>) (:focus)',
-					selector: ':root:has(> :focus)',
-				},
-				{
-					description: ':root prefix with child combinator (>) (a:focus)',
-					selector: ':root:has(> a:focus)',
-				},
+			const directFocusSelectors = [
 				{
 					description: ':root prefix with descendant combinator (:focus)',
 					selector: ':root:has(:focus)',
@@ -82,14 +72,6 @@
 				{
 					description: ':root prefix with descendant combinator (a:focus)',
 					selector: ':root:has(a:focus)',
-				},
-				{
-					description: '#target prefix with child combinator (>) (:focus)',
-					selector: '#target:has(> :focus)',
-				},
-				{
-					description: '#target prefix with child combinator (>) (a:focus)',
-					selector: '#target:has(> a:focus)',
 				},
 				{
 					description: '#target prefix with descendant combinator (:focus)',
@@ -100,20 +82,31 @@
 					selector: '#target:has(a:focus)',
 				},
 				{
-					description: 'Repeated #target inside :has() with descendant combinator (:focus)',
-					selector: '#target:has(#target :focus)',
+					description: '#target prefix with child combinator (>) (:focus)',
+					selector: '#target:has(> :focus)',
 				},
 				{
-					description: 'Repeated #target inside :has() with descendant combinator (a:focus)',
-					selector: '#target:has(#target a:focus)',
+					description: '#target prefix with child combinator (>) (a:focus)',
+					selector: '#target:has(> a:focus)',
+				},
+			];
+
+			const deepFocusSelectors = [
+				{
+					description: ':root prefix with descendant combinator (:focus)',
+					selector: ':root:has(:focus)',
 				},
 				{
-					description: 'Repeated #target inside :has() with child combinator (>) (:focus)',
-					selector: '#target:has(#target > :focus)',
+					description: ':root prefix with descendant combinator (a:focus)',
+					selector: ':root:has(a:focus)',
 				},
 				{
-					description: 'Repeated #target inside :has() with child combinator (>) (a:focus)',
-					selector: '#target:has(#target > a:focus)',
+					description: '#target prefix with descendant combinator (:focus)',
+					selector: '#target:has(:focus)',
+				},
+				{
+					description: '#target prefix with descendant combinator (a:focus)',
+					selector: '#target:has(a:focus)',
 				},
 			];
 
@@ -156,23 +149,17 @@
 			const average = (array) => (Array.isArray(array) ? array.reduce((a, b) => a + b, 0) / array.length : array);
 
 			window.getTests = () => [
-				...selectors.map((s) => ({
+				...directFocusSelectors.map((s) => ({
 					scenario: '1. Direct Child Focus (#target > a)',
 					description: `Direct Focus: ${s.description}`,
 					selector: s.selector,
 					mode: 'direct',
 				})),
-				...selectors.map((s) => ({
+				...deepFocusSelectors.map((s) => ({
 					scenario: '2. Deep Descendant Focus (#target .deep a)',
 					description: `Deep Focus: ${s.description}`,
 					selector: s.selector,
 					mode: 'deep',
-				})),
-				...selectors.map((s) => ({
-					scenario: '3. Outer Element Focus (#outer a)',
-					description: `Outer Focus: ${s.description}`,
-					selector: s.selector,
-					mode: 'outer',
 				})),
 			];
 
@@ -183,14 +170,10 @@
 						if (typeof onStart === 'function') {
 							onStart(test);
 						}
-						let testResult;
-						if (test.mode === 'direct') {
-							testResult = await runFocusToggleTest(test.description, test.selector, () => $directChildLink);
-						} else if (test.mode === 'deep') {
-							testResult = await runFocusToggleTest(test.description, test.selector, () => $deepChildLink);
-						} else {
-							testResult = await runFocusToggleTest(test.description, test.selector, () => $outerLink);
-						}
+						const testResult =
+							test.mode === 'direct'
+								? await runFocusToggleTest(test.description, test.selector, () => $directChildLink)
+								: await runFocusToggleTest(test.description, test.selector, () => $deepChildLink);
 						const avg = average(testResult);
 						const item = {
 							scenario: test.scenario,

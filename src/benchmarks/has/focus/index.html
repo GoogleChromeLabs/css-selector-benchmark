@@ -361,7 +361,7 @@
 					file: 'has/focus/tests.html',
 					title: 'tests.html',
 					label: ':has(:focus) & :has(a:focus) Scoping & Combinators',
-					desc: 'Compares :focus vs a:focus, :root vs #target, > vs descendant combinator, and repeated #target inside :has() across direct, deep, and outer focus',
+					desc: 'Compares :focus vs a:focus, :root vs #target, and > vs descendant combinator across direct and deep focus',
 				},
 			];
 			window.TEST_FILES = TEST_FILES;
@@ -673,25 +673,19 @@
 				<a href="../../../" class="btn-back">&larr; Back to index</a>
 			</nav>
 			<header>
-				<h1>:has(:focus) &amp; :has(a:focus) Scoping, Child Combinator &amp; Repeated Subject</h1>
+				<h1>:has(:focus) &amp; :has(a:focus) Scoping &amp; Child Combinator</h1>
 				<p class="lead">
-					Compares style invalidation and recalculation performance when toggling focus on an <code>&lt;a&gt;</code> element across twelve <code>:has()</code> selector patterns: testing bare
-					<code>:focus</code> vs. tag-qualified <code>a:focus</code>, <code>:root</code> vs. <code>#target</code> subject prefixes, direct child (<code>&gt;</code>) vs. descendant
-					combinators, and repeating <code>#target</code> inside <code>:has()</code>.
+					Compares style invalidation and recalculation performance when toggling focus on an <code>&lt;a&gt;</code> element across matching <code>:has()</code> selector patterns: testing
+					bare <code>:focus</code> vs. tag-qualified <code>a:focus</code>, <code>:root</code> vs. <code>#target</code> subject prefixes, and direct child (<code>&gt;</code>) vs. descendant
+					combinators.
 				</p>
 				<div class="selector-chips">
-					<span class="chip">:root:has(&gt; :focus)</span>
-					<span class="chip">:root:has(&gt; a:focus)</span>
 					<span class="chip">:root:has(:focus)</span>
 					<span class="chip">:root:has(a:focus)</span>
-					<span class="chip">#target:has(&gt; :focus)</span>
-					<span class="chip">#target:has(&gt; a:focus)</span>
 					<span class="chip">#target:has(:focus)</span>
 					<span class="chip">#target:has(a:focus)</span>
-					<span class="chip">#target:has(#target :focus)</span>
-					<span class="chip">#target:has(#target a:focus)</span>
-					<span class="chip">#target:has(#target &gt; :focus)</span>
-					<span class="chip">#target:has(#target &gt; a:focus)</span>
+					<span class="chip">#target:has(&gt; :focus)</span>
+					<span class="chip">#target:has(&gt; a:focus)</span>
 				</div>
 			</header>
 
@@ -733,12 +727,11 @@
 					<p>
 						The DOM fixture mounts two sibling subtrees of 500 nested items each (<code>#outer</code> and <code>#target</code>), plus a direct-child <code>&lt;a href="#"&gt;</code> inside
 						<code>#target</code>. Each test toggles <code>focus()</code> and <code>blur()</code> on an <code>&lt;a&gt;</code> element and flushes styles via
-						<code>getComputedStyle($target).outlineColor</code> across three focus locations:
+						<code>getComputedStyle($target).outlineColor</code> across two focus locations:
 					</p>
 					<ul>
-						<li><strong>Direct Child Focus:</strong> Focusing <code>#target &gt; a</code>.</li>
-						<li><strong>Deep Descendant Focus:</strong> Focusing a deeply nested <code>&lt;a&gt;</code> inside <code>#target</code>.</li>
-						<li><strong>Outer Element Focus:</strong> Focusing an <code>&lt;a&gt;</code> inside <code>#outer</code> (outside <code>#target</code>).</li>
+						<li><strong>Direct Child Focus:</strong> Focusing <code>#target &gt; a</code> (matched by all 6 selectors).</li>
+						<li><strong>Deep Descendant Focus:</strong> Focusing a deeply nested <code>&lt;a&gt;</code> inside <code>#target</code> (matched by the 4 descendant selectors).</li>
 					</ul>
 				</div>
 				<div class="info-card">
@@ -750,8 +743,7 @@
 						</li>
 						<li>
 							<strong>Subtree re-evaluation still dominates:</strong> Qualifying <code>:focus</code> with a tag name (<code>a:focus</code>) performs nearly identically to bare
-							<code>:focus</code> (~1% difference); scoping the subject (<code>#target</code> vs. <code>:root</code>) and using the child combinator (<code>&gt;</code>) are what
-							eliminate costly subtree walks.
+							<code>:focus</code>; scoping the subject (<code>#target</code> vs. <code>:root</code>) and using the child combinator (<code>&gt;</code>) are what reduce subtree walks.
 						</li>
 					</ul>
 				</div>
@@ -759,28 +751,19 @@
 					<h3>2. <code>:root</code> vs. <code>#target</code> Prefix</h3>
 					<ul>
 						<li>
-							<strong>Focus outside <code>#target</code>:</strong> With <code>:root:has(:focus)</code> or <code>:root:has(a:focus)</code>, <code>:root</code> is an ancestor of every node
-							on the page, so focusing or blurring any link anywhere in the document invalidates <code>:root</code> and walks the entire DOM (~6.2&times; slower). Scoping to
-							<code>#target:has(...)</code> completely avoids invalidating <code>#target</code> when focus changes outside <code>#target</code>.
-						</li>
-						<li>
-							<strong>Focus inside <code>#target</code>:</strong> On <code>blur()</code>, <code>#target:has(...)</code> only walks <code>#target</code>&rsquo;s subtree to verify no other
-							descendant is focused, whereas <code>:root:has(...)</code> must scan the entire document.
+							<strong>Smaller subtree scan on <code>blur()</code>:</strong> When focus is blurred inside <code>#target</code>, <code>#target:has(:focus)</code> only walks
+							<code>#target</code>&rsquo;s subtree (500 items) to verify no other descendant is focused, whereas <code>:root:has(:focus)</code> must scan the entire document (both
+							<code>#outer</code> and <code>#target</code>, 1,000 items total).
 						</li>
 					</ul>
 				</div>
 				<div class="info-card">
-					<h3>3. Child Combinator (<code>&gt;</code>) &amp; Repeated <code>#target</code></h3>
+					<h3>3. Child Combinator (<code>&gt;</code>) vs. Descendant</h3>
 					<ul>
 						<li>
-							<strong>Single-hop invalidation (<code>&gt;</code>):</strong> With <code>#target:has(&gt; :focus)</code> or <code>#target:has(&gt; a:focus)</code>, the engine only checks
-							<code>focusedElement.parentElement</code>. Focusing a deep descendant inside <code>#target</code> never invalidates <code>#target</code> (~3.8&times; faster than
-							<code>#target:has(:focus)</code>).
-						</li>
-						<li>
-							<strong>Repeated <code>#target</code> loses <code>&gt;</code> optimization:</strong> Writing <code>#target:has(#target &gt; :focus)</code> or
-							<code>#target:has(#target &gt; a:focus)</code> parses as <code>#target:has(:scope #target &gt; ...)</code>, introducing an implicit descendant combinator that makes deep
-							focus ~5&times; slower than <code>#target:has(&gt; :focus)</code>.
+							<strong>Shallow re-evaluation:</strong> When focusing and blurring a direct child of <code>#target</code>, <code>#target:has(&gt; :focus)</code> and
+							<code>#target:has(&gt; a:focus)</code> only inspect direct children of <code>#target</code> rather than traversing all 500 nested subtrees (~1.7&ndash;1.8&times; faster
+							than <code>#target:has(:focus)</code> and ~2&times; faster than <code>:root:has(:focus)</code>).
 						</li>
 					</ul>
 				</div>
