@@ -38,7 +38,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "prettier": "^3.9.6",
-    "serve": "^14.2.6"
+    "serve": "^14.2.8"
   },
   "dependencies": {
     "puppeteer": "^25.18.1"
