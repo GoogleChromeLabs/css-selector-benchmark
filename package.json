@@ -41,6 +41,6 @@
     "serve": "^14.2.6"
   },
   "dependencies": {
-    "puppeteer": "^25.10.0"
+    "puppeteer": "^25.18.1"
   }
 }
